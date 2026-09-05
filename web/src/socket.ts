@@ -3,9 +3,6 @@
 // backoff (webview reloads, dev server restarts, HMR) and re-announces
 // the active page on every connect so the server always re-renders.
 
-import { perfMark } from "./perf";
-import { applyPatch, type PatchOp } from "./patch";
-
 /** GantryCallError rejects a failed callGo with the gerr code the Go
  * side attached ("panic.call", or the code of the returned error), so
  * callers can switch on it. */
@@ -40,8 +37,6 @@ type StateListener = () => void;
 let ws: WebSocket | null = null;
 let url = "";
 let activePage = "";
-// One-shot guard so the perf log marks only the first Tea render frame.
-let firstRenderMarked = false;
 // The active page's captured route params, re-sent on every (re)connect
 // alongside the page key so the Go side can read them. Normalized to
 // arrays on the wire: a [id] value is a single-element array, a [...slug]
@@ -49,11 +44,6 @@ let firstRenderMarked = false;
 let activeParams: Record<string, string[]> = {};
 let backoff = 300;
 let renderListener: RenderListener | null = null;
-// The most recent Tea tree for the active page, replayed to a listener
-// that subscribes after the frame already arrived - a lazily-loaded page
-// whose TeaView mounts after the server rendered. Cleared by ready() so a
-// new page never shows the previous page's tree.
-let lastRenderTree: WireNode | null = null;
 const pushListeners = new Map<string, Set<PushListener>>();
 const sendQueue: string[] = [];
 
@@ -84,7 +74,6 @@ function open(): void {
   ws = sock;
   sock.onopen = () => {
     backoff = 300;
-    perfMark("ws-open");
     if (activePage) sock.send(JSON.stringify({ t: "ready", page: activePage, params: activeParams }));
     while (sendQueue.length > 0) sock.send(sendQueue.shift() as string);
   };
@@ -92,7 +81,6 @@ function open(): void {
     let msg: {
       t: string;
       tree?: WireNode;
-      ops?: PatchOp[];
       key?: string;
       name?: string;
       p?: unknown;
@@ -107,20 +95,7 @@ function open(): void {
       return;
     }
     if (msg.t === "render" && msg.tree) {
-      if (!firstRenderMarked) {
-        firstRenderMarked = true;
-        perfMark("first-tea-render");
-      }
-      lastRenderTree = msg.tree;
       renderListener?.(msg.tree);
-    } else if (msg.t === "patch") {
-      // Edits against the tree we already have. If we have no base yet
-      // (a patch racing a page switch), ignore it - the server sends a
-      // full frame after ready and we resync then.
-      if (lastRenderTree) {
-        lastRenderTree = applyPatch(lastRenderTree, msg.ops ?? []);
-        renderListener?.(lastRenderTree);
-      }
     } else if (msg.t === "push" && msg.key && msg.name) {
       pushListeners.get(msg.key)?.forEach((fn) => fn(msg.name as string, msg.p));
     } else if (msg.t === "reply" && msg.id) {
@@ -164,9 +139,6 @@ function send(obj: unknown): void {
 export function ready(pageKey: string, params?: Record<string, string | string[]>): void {
   activePage = pageKey;
   activeParams = normalizeParams(params);
-  // New page announced: the prior page's tree is no longer valid, so a
-  // late-mounting TeaView must wait for this page's fresh render.
-  lastRenderTree = null;
   send({ t: "ready", page: pageKey, params: activeParams });
 }
 
@@ -191,12 +163,9 @@ export function sendPaired(key: string, name: string, payload?: unknown): void {
   send({ t: "event", key, name, p: payload });
 }
 
-/** onRender subscribes the (single) Tea tree consumer. A listener that
- * subscribes after the server already rendered (a lazily-loaded page)
- * gets the latest tree replayed at once, so no frame is missed. */
+/** onRender subscribes the (single) Tea tree consumer. */
 export function onRender(fn: RenderListener | null): void {
   renderListener = fn;
-  if (fn && lastRenderTree) fn(lastRenderTree);
 }
 
 /** onPush subscribes to pushes for one paired key; returns unsubscribe. */

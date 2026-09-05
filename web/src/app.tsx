@@ -1,5 +1,5 @@
 /// <reference path="../types/index.d.ts" />
-import { Component, StrictMode, Suspense, lazy, useEffect, type ErrorInfo as ReactErrorInfo, type FC, type LazyExoticComponent, type ReactNode } from "react";
+import { Component, StrictMode, useEffect, type ErrorInfo as ReactErrorInfo, type FC, type ReactNode } from "react";
 import { createRoot } from "react-dom/client";
 import { TitleBar, type TitleBarProps } from "./TitleBar";
 import { ResizeFrame } from "./ResizeFrame";
@@ -10,7 +10,6 @@ import { setRegistry, type ComponentRegistry, type TeaComponentProps } from "./t
 import { installErrorHandlers, reportError, useGantryErrors, dismissNotice, clearFatal, setDevMode, type ErrorHandlingOptions, type GantryErrorInfo } from "./errors";
 import { ErrorScreen, type ErrorScreenProps } from "./ErrorScreen";
 import { fetchEnv, useMode } from "./env";
-import { perfMark } from "./perf";
 
 /** The shape of a page module (a pages/<name>/<name>.tsx file). */
 export interface GantryPageModule {
@@ -31,22 +30,7 @@ export interface GantryPageModule {
 export interface GantryPage {
   key: string;
   route: string;
-  /**
-   * Hide the TitleBar on this page. The Vite plugin reads it statically
-   * from the page's `export const chrome` so routing knows it without
-   * loading the (lazily-imported) page module.
-   */
-  chrome?: boolean;
-  /**
-   * Which layouts wrap this page, read statically from the page's
-   * `export const layout` (see GantryPageModule.layout for the shape).
-   */
-  layout?: boolean | string | string[];
-  /**
-   * Lazily import the page module: only the active page's code loads at
-   * startup, the rest split into their own chunks fetched on navigation.
-   */
-  load: () => Promise<GantryPageModule>;
+  mod: GantryPageModule;
 }
 
 /**
@@ -106,9 +90,7 @@ function keyClass(key: string): string {
 }
 
 function routeOf(p: GantryPage): string {
-  // Any `export const route` override is baked into p.route by the plugin
-  // (it is read statically so routing works without loading the module).
-  return p.route;
+  return p.mod.route ?? p.route;
 }
 
 // A route compiles to typed segments: a literal must match exactly, a
@@ -198,19 +180,6 @@ function match(path: string): RouteMatch | null {
   return null;
 }
 
-// Lazily-created page components, cached by key so returning to a page
-// reuses its module (React.lazy resolves once, no re-fetch on back/forth).
-const lazyPages = new Map<string, LazyExoticComponent<FC>>();
-
-function pageComponent(page: GantryPage): LazyExoticComponent<FC> {
-  let c = lazyPages.get(page.key);
-  if (!c) {
-    c = lazy(page.load as () => Promise<{ default: FC }>);
-    lazyPages.set(page.key, c);
-  }
-  return c;
-}
-
 function PageHost({ page, params }: { page: GantryPage; params: RouteParams }) {
   // Re-announce when the page key OR the concrete params change: the same
   // dynamic page key ("pages/.../[id]") is reused across /1, /2, ... so a
@@ -220,15 +189,11 @@ function PageHost({ page, params }: { page: GantryPage; params: RouteParams }) {
     ready(page.key, params);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page.key, paramsKey]);
-  const Page = pageComponent(page);
-  // Suspense covers the async chunk load. A late Tea render frame is not
-  // lost: onRender replays the latest tree when TeaView mounts (socket.ts).
+  const Page = page.mod.default;
   return (
     <ParamsContext.Provider value={params}>
       <div className={"gantry-page " + keyClass(page.key)}>
-        <Suspense fallback={null}>
-          <Page />
-        </Suspense>
+        <Page />
       </div>
     </ParamsContext.Provider>
   );
@@ -242,7 +207,7 @@ function PageHost({ page, params }: { page: GantryPage; params: RouteParams }) {
 //   layout = "compact"   -> that one
 //   layout = ["main","compact"] -> nested: <Main><Compact><Page/>...
 function layoutsFor(page: GantryPage, chrome: boolean): FC<{ children?: ReactNode }>[] {
-  const sel = page.layout;
+  const sel = page.mod.layout;
   let names: string[];
   if (sel === false) {
     names = [];
@@ -333,7 +298,7 @@ function AppRoot({ options }: { options: CreateAppOptions }) {
     return <div className="gantry-app">No pages found - add pages/index/index.tsx</div>;
   }
   const params = result?.params ?? {};
-  const chrome = options.chrome !== false && page.chrome !== false;
+  const chrome = options.chrome !== false && page.mod.chrome !== false;
   let content = <PageHost page={page} params={params} />;
   for (const Layout of layoutsFor(page, chrome).reverse()) {
     content = <Layout>{content}</Layout>;
@@ -360,7 +325,6 @@ function AppRoot({ options }: { options: CreateAppOptions }) {
  * an app only touches it to pass options.
  */
 export function createApp(app: GantryAppModule, options: CreateAppOptions = {}): void {
-  perfMark("createApp");
   reg = app;
   // The optional root app.tsx wins over the synthesized defaults, so
   // apps customize everything without owning the entry file.
@@ -401,7 +365,4 @@ export function createApp(app: GantryAppModule, options: CreateAppOptions = {}):
       <AppRoot options={options} />
     </StrictMode>,
   );
-  // First painted frame after the initial React commit - the closest
-  // proxy for time-to-first-paint we can measure from here.
-  requestAnimationFrame(() => perfMark("first-frame"));
 }

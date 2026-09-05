@@ -46,6 +46,7 @@ type frame struct {
 	Code string          `json:"code,omitempty"`
 	P    json.RawMessage `json:"p,omitempty"`
 	Tree json.RawMessage `json:"tree,omitempty"`
+	Ops  json.RawMessage `json:"ops,omitempty"`
 
 	raw []byte
 }
@@ -88,6 +89,7 @@ type client struct {
 	cursors      map[string]int  // consumption cursors (pushes, error frames)
 	renderCursor int             // frames index of the last render NextRender returned
 	consumed     map[string]bool // error signatures already returned by WaitError
+	currentTree  json.RawMessage // running tree, updated by render/patch frames
 }
 
 func dialClient(t testing.TB, tr *trace, port int, timeout time.Duration, observer bool, token string) (*client, error) {
@@ -145,8 +147,20 @@ func (c *client) readLoop() {
 		c.tr.frame("recv", data)
 
 		c.mu.Lock()
-		c.frames = append(c.frames, f)
 		switch f.T {
+		case "render":
+			c.currentTree = f.Tree
+		case "patch":
+			// Materialize the diff against the running tree and surface it
+			// as a render, so the tree waiters (Tree/WaitTree/NextRender)
+			// observe the update the same as a full frame.
+			if c.currentTree != nil {
+				if materialized, err := applyPatchJSON(c.currentTree, f.Ops); err == nil {
+					c.currentTree = materialized
+				}
+			}
+			f.T = "render"
+			f.Tree = c.currentTree
 		case "state":
 			c.states[f.Key] = f.P
 		case "error":
@@ -155,6 +169,7 @@ func (c *client) readLoop() {
 				c.errs = append(c.errs, e)
 			}
 		}
+		c.frames = append(c.frames, f)
 		c.cond.Broadcast()
 		c.mu.Unlock()
 	}
