@@ -48,6 +48,11 @@ let firstRenderMarked = false;
 let activeParams: Record<string, string[]> = {};
 let backoff = 300;
 let renderListener: RenderListener | null = null;
+// The most recent Tea tree for the active page, replayed to a listener
+// that subscribes after the frame already arrived - a lazily-loaded page
+// whose TeaView mounts after the server rendered. Cleared by ready() so a
+// new page never shows the previous page's tree.
+let lastRenderTree: WireNode | null = null;
 const pushListeners = new Map<string, Set<PushListener>>();
 const sendQueue: string[] = [];
 
@@ -104,6 +109,7 @@ function open(): void {
         firstRenderMarked = true;
         perfMark("first-tea-render");
       }
+      lastRenderTree = msg.tree;
       renderListener?.(msg.tree);
     } else if (msg.t === "push" && msg.key && msg.name) {
       pushListeners.get(msg.key)?.forEach((fn) => fn(msg.name as string, msg.p));
@@ -148,6 +154,9 @@ function send(obj: unknown): void {
 export function ready(pageKey: string, params?: Record<string, string | string[]>): void {
   activePage = pageKey;
   activeParams = normalizeParams(params);
+  // New page announced: the prior page's tree is no longer valid, so a
+  // late-mounting TeaView must wait for this page's fresh render.
+  lastRenderTree = null;
   send({ t: "ready", page: pageKey, params: activeParams });
 }
 
@@ -172,9 +181,12 @@ export function sendPaired(key: string, name: string, payload?: unknown): void {
   send({ t: "event", key, name, p: payload });
 }
 
-/** onRender subscribes the (single) Tea tree consumer. */
+/** onRender subscribes the (single) Tea tree consumer. A listener that
+ * subscribes after the server already rendered (a lazily-loaded page)
+ * gets the latest tree replayed at once, so no frame is missed. */
 export function onRender(fn: RenderListener | null): void {
   renderListener = fn;
+  if (fn && lastRenderTree) fn(lastRenderTree);
 }
 
 /** onPush subscribes to pushes for one paired key; returns unsubscribe. */
