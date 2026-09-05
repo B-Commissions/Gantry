@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -214,13 +215,16 @@ func (p *program) serialize(n Node) wireNode {
 		w.Handlers = make(map[string]string, len(n.handlers))
 		for event, fn := range n.handlers {
 			p.nextID++
-			id := fmt.Sprintf("h%d", p.nextID)
+			id := "h" + strconv.Itoa(p.nextID)
 			p.handlers[id] = fn
 			w.Handlers[event] = id
 		}
 	}
-	for _, c := range n.Children {
-		w.Children = append(w.Children, p.serialize(c))
+	if len(n.Children) > 0 {
+		w.Children = make([]wireNode, 0, len(n.Children))
+		for _, c := range n.Children {
+			w.Children = append(w.Children, p.serialize(c))
+		}
 	}
 	return w
 }
