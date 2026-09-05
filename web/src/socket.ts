@@ -4,6 +4,7 @@
 // the active page on every connect so the server always re-renders.
 
 import { perfMark } from "./perf";
+import { applyPatch, type PatchOp } from "./patch";
 
 /** GantryCallError rejects a failed callGo with the gerr code the Go
  * side attached ("panic.call", or the code of the returned error), so
@@ -91,6 +92,7 @@ function open(): void {
     let msg: {
       t: string;
       tree?: WireNode;
+      ops?: PatchOp[];
       key?: string;
       name?: string;
       p?: unknown;
@@ -111,6 +113,14 @@ function open(): void {
       }
       lastRenderTree = msg.tree;
       renderListener?.(msg.tree);
+    } else if (msg.t === "patch") {
+      // Edits against the tree we already have. If we have no base yet
+      // (a patch racing a page switch), ignore it - the server sends a
+      // full frame after ready and we resync then.
+      if (lastRenderTree) {
+        lastRenderTree = applyPatch(lastRenderTree, msg.ops ?? []);
+        renderListener?.(lastRenderTree);
+      }
     } else if (msg.t === "push" && msg.key && msg.name) {
       pushListeners.get(msg.key)?.forEach((fn) => fn(msg.name as string, msg.p));
     } else if (msg.t === "reply" && msg.id) {
