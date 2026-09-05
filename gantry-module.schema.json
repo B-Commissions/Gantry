@@ -1,0 +1,75 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/BlueBeard63/Gantry/main/gantry-module.schema.json",
+  "title": "Gantry module manifest",
+  "description": "gantry-module.json: identity and capabilities of a Gantry module, embedded in its provider command and printed by `<provider> gantry manifest`.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["namespace", "title", "module", "provides"],
+  "properties": {
+    "$schema": { "type": "string" },
+    "namespace": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9-]*$",
+      "description": "Unique id across installed modules; used verbatim as the docs route prefix (/<namespace>/...)."
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Display name shown by `gantry module list` and as the docs sidebar heading."
+    },
+    "module": {
+      "type": "string",
+      "minLength": 1,
+      "description": "The Go module path, e.g. github.com/BlueBeard63/WhiteGantry."
+    },
+    "version": {
+      "type": "string",
+      "description": "Informational. The authoritative installed version is what the Go toolchain resolves at install time."
+    },
+    "gantry": {
+      "type": "string",
+      "description": "Minimum framework version constraint, e.g. \">=0.4.0\". Checked against the running gantry CLI at install."
+    },
+    "provides": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "The capabilities this module contributes. At least one is required.",
+      "minProperties": 1,
+      "properties": {
+        "docs": {
+          "type": "object",
+          "additionalProperties": false,
+          "description": "A tree of markdown pages merged into `gantry docs` under the route prefix.",
+          "properties": {
+            "prefix": {
+              "type": "string",
+              "description": "Optional; defaults to /<namespace> and must equal it when set."
+            },
+            "title": {
+              "type": "string",
+              "description": "Optional docs sidebar/category label; defaults to the module title."
+            }
+          }
+        },
+        "lib": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["import"],
+          "description": "An importable Go package apps depend on; drives the optional go.mod prompt.",
+          "properties": {
+            "import": {
+              "type": "string",
+              "minLength": 1,
+              "description": "The import path apps use, e.g. github.com/BlueBeard63/WhiteGantry."
+            },
+            "summary": {
+              "type": "string",
+              "description": "One-line description of the library."
+            }
+          }
+        }
+      }
+    }
+  }
+}

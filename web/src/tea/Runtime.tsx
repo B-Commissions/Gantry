@@ -1,5 +1,6 @@
 import {
   createElement,
+  memo,
   useEffect,
   useRef,
   useState,
@@ -26,25 +27,33 @@ export function setRegistry(reg: ComponentRegistry): void {
   appRegistry = reg;
 }
 
-function emitFor(node: WireNode) {
-  return (event: string, payload?: unknown) => {
+type EmitFn = (event: string, payload?: unknown) => void;
+
+// A shared no-op emit for the many layout nodes (column, row, text, ...)
+// that carry no handlers, so rendering them allocates no closure.
+const NO_EMIT: EmitFn = () => {};
+
+function emitFor(node: WireNode): EmitFn {
+  if (!node.handlers) return NO_EMIT;
+  return (event, payload) => {
     const id = node.handlers?.[event];
     if (id) sendTeaEvent(id, payload);
   };
 }
 
-function styleHints(props: Record<string, unknown> | undefined): {
-  style: Record<string, string | number>;
-  className: string;
-} {
+type StyleHints = { style: Record<string, string | number>; className: string };
+
+// Shared result for propless nodes, so the common case allocates nothing.
+const EMPTY_HINTS: StyleHints = { style: {}, className: "" };
+
+function styleHints(props: Record<string, unknown> | undefined): StyleHints {
+  if (!props) return EMPTY_HINTS;
   const style: Record<string, string | number> = {};
   let className = "";
-  if (props) {
-    if (typeof props.gap === "number") style.gap = props.gap;
-    if (typeof props.pad === "number") style.padding = props.pad;
-    if (props.grow === true) style.flexGrow = 1;
-    if (typeof props.class === "string") className = props.class;
-  }
+  if (typeof props.gap === "number") style.gap = props.gap;
+  if (typeof props.pad === "number") style.padding = props.pad;
+  if (props.grow === true) style.flexGrow = 1;
+  if (typeof props.class === "string") className = props.class;
   return { style, className };
 }
 
@@ -87,7 +96,11 @@ function TeaInput({ node }: { node: WireNode }) {
   );
 }
 
-function NodeView({ node }: { node: WireNode }) {
+// NodeView is memoized so that once render frames preserve node identity
+// for unchanged subtrees (wire-level diffing), React skips re-rendering
+// those branches entirely. Until then the shallow compare is a cheap
+// no-op that costs one reference check per node.
+const NodeView = memo(function NodeView({ node }: { node: WireNode }) {
   const { style, className } = styleHints(node.props);
   const cls = (base: string) => base + (className ? " " + className : "");
   const emit = emitFor(node);
@@ -176,7 +189,7 @@ function NodeView({ node }: { node: WireNode }) {
       return <div className="gantry-tea-unknown">[unknown component: {node.type}]</div>;
     }
   }
-}
+});
 
 /**
  * TeaView renders the Go-driven tree for the current page. Put one in

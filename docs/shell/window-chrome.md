@@ -2,6 +2,8 @@
 
 By default the main window is *frameless*: `RunWindow` strips the OS title bar and your React frontend draws the chrome (the title band and the window buttons), while movement, resizing and the buttons drive the real native window through bound JS functions. This page covers that contract - frameless mode, the title-bar button toggles, the invisible hit-test metrics that make drawn chrome behave like a real caption, the bound bridge functions, and the `useShell()` surface that wraps them. For the React component that renders the chrome, see [The TitleBar](../ui/titlebar.md); for the plain field list, see [Window options](window-options.md).
 
+![A frameless window: a top caption band drags the window except for a small left reserve and a right reserve holding the window buttons; the rest is HTCLIENT, and a thin resize margin around every edge starts a native resize.](window-chrome-zones.svg)
+
 ## Frameless vs framed
 
 ### Framed `bool` (default false)

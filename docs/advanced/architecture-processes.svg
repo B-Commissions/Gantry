@@ -1,0 +1,83 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 440" width="900" height="440" role="img" aria-labelledby="arch-title arch-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="arch-title">A Gantry app's process shape and its two transports</title>
+  <desc id="arch-desc">One binary runs the main process: a loopback HTTP server and a native webview window. The webview talks to Go over a one-way bridge and the /gantry/ws websocket. Widgets and popups run as child processes that re-invoke the same exe and load their pages from the server.</desc>
+  <defs>
+    <marker id="ar-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="ar-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- main process boundary -->
+  <rect x="324" y="48" width="264" height="208" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="340" y="72" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.12em">MAIN PROCESS · MAIN.EXE</text>
+
+  <!-- arrows -->
+  <!-- bridge: window -> server (one-way) -->
+  <path d="M 424 152 V 176" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ar-arrow)"/>
+  <!-- websocket: server -> window -->
+  <path d="M 504 176 V 152" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#ar-arrow-accent)"/>
+  <!-- server -> widget (spawn + http) -->
+  <path d="M 384 240 V 288 q0 8 -8 8 H 204 q-8 0 -8 8 V 320" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ar-arrow)"/>
+  <!-- server -> popup (spawn + http) -->
+  <path d="M 528 240 V 288 q0 8 8 8 H 716 q8 0 8 8 V 320" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ar-arrow)"/>
+
+  <!-- arrow labels -->
+  <rect x="360" y="150" width="40" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="380" y="159" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">BRIDGE</text>
+
+  <rect x="512" y="150" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="548" y="159" fill="#eb6c36" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">/gantry/ws</text>
+
+  <rect x="238" y="286" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="274" y="295" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">SPAWN · HTTP</text>
+
+  <rect x="590" y="286" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="626" y="295" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">SPAWN · HTTP</text>
+
+  <!-- main window -->
+  <rect x="360" y="80" width="200" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="360" y="80" width="200" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="368" y="88" width="34" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="385" y="97" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">VIEW</text>
+  <text x="460" y="118" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">main window</text>
+  <text x="460" y="136" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">WebView2 / WebKitGTK</text>
+
+  <!-- HTTP server (focal hub) -->
+  <rect x="360" y="176" width="200" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="360" y="176" width="200" height="72" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <rect x="368" y="184" width="28" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+  <text x="382" y="193" fill="#eb6c36" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">SRV</text>
+  <text x="460" y="214" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">HTTP server</text>
+  <text x="460" y="232" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">127.0.0.1:port · webdist</text>
+
+  <!-- widget child -->
+  <rect x="96" y="320" width="200" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="96" y="320" width="200" height="72" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+  <rect x="104" y="328" width="34" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.3)" stroke-width="0.8"/>
+  <text x="121" y="337" fill="#4f5d75" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">PROC</text>
+  <text x="196" y="358" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">widget</text>
+  <text x="196" y="376" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">child process</text>
+
+  <!-- popup child -->
+  <rect x="624" y="320" width="200" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="624" y="320" width="200" height="72" rx="6" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+  <rect x="632" y="328" width="34" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.3)" stroke-width="0.8"/>
+  <text x="649" y="337" fill="#4f5d75" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">PROC</text>
+  <text x="724" y="358" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">popup</text>
+  <text x="724" y="376" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">child process</text>
+
+  <!-- editorial aside -->
+  <text x="32" y="120" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">One binary plays every</text>
+  <text x="32" y="140" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">role. Children re-invoke</text>
+  <text x="32" y="160" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">it with --shellrole.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="416" x2="868" y2="416" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="432" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="120" y="424" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="136" y="432" fill="#4f5d75" font-size="9">server (hub)</text>
+  <rect x="236" y="424" width="10" height="10" rx="2" fill="rgba(45,49,66,0.03)" stroke="rgba(45,49,66,0.3)" stroke-width="1"/>
+  <text x="252" y="432" fill="#4f5d75" font-size="9">child process</text>
+  <text x="356" y="432" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">BRIDGE = one-way JS to Go · /gantry/ws = app-level, server can push</text>
+</svg>

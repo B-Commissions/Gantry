@@ -2,6 +2,8 @@
 
 A page can keep its whole UI - state, logic, and structure - in Go, with React as the renderer. The shape comes from Elm by way of Bubble Tea: a `Model` with three methods, driven by one serialized loop. This page covers that loop - the `Model` interface, how a page registers one, the update cycle, render coalescing, and the panic codes that keep the loop alive. Its two siblings cover what the loop produces and what feeds it: [The node tree](tea-nodes.md) for every `View` builder, and [Commands & messages](tea-commands.md) for every way work re-enters the loop.
 
+![One serialized loop: View renders the Model as a node tree sent to React; a user event becomes a Msg that Update folds into a new Model, and commands run asynchronously and re-enter as messages.](tea-loop.svg)
+
 ## The Model interface
 
 ```go

@@ -2,6 +2,8 @@
 
 A Gantry feature is a **pair**: a `.tsx` file and the `.go` file next to it, talking over one websocket. Pages and components are both pairs - they share this whole mechanism and differ only in what makes one a page and the other a component. This page is the pairing system itself: the key that ties the halves together, the four things `usePaired()` gives the tsx side, how data flows both ways, and how a pair registers itself. Everything here is identical whether the pair is a [page](pages.md), a [component](components.md), or shared chrome under [layouts/](layouts.md).
 
+![A pair's tsx and go halves share a key and talk over one websocket: send fires a one-way handler, call awaits a result, and Go pushes events and state back to the tsx side.](pairs-flow.svg)
+
 ## Keys: how the halves find each other
 
 Every pair is identified by its **folder path relative to the app root**: `pages/index`, `pages/settings`, `components/example`. The Go half declares it in the `Key` field; the tsx half gets the same string injected by the Gantry Vite plugin from the file's location, so only one side ever writes it out.

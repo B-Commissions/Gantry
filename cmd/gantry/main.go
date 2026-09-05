@@ -35,6 +35,7 @@ var usageCommands = []struct{ cmd, desc string }{
 	{"gantry upgrade", "upgrade the current app to the CLI's version (templates + packages)"},
 	{"gantry mobile dev <os>", "build + run on a plugged-in phone with live logcat (android|ios)"},
 	{"gantry docs [topic]", "browse the documentation offline"},
+	{"gantry module <cmd>", "manage Gantry modules (install|list|uninstall|update|info)"},
 	{"gantry --version", "print the CLI version"},
 }
 
@@ -86,6 +87,8 @@ func main() {
 		err = cmdMobile(os.Args[2:])
 	case "docs":
 		err = cmdDocs(os.Args[2:])
+	case "module":
+		err = cmdModule(os.Args[2:])
 	case "version", "-v", "--version":
 		fmt.Println("Version: " + fullVersion())
 	case "help", "-h", "--help":

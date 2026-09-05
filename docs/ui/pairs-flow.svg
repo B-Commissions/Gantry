@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 420" width="900" height="420" role="img" aria-labelledby="pairs-title pairs-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="pairs-title">The paired-file model: a .tsx and .go half over one websocket</title>
+  <desc id="pairs-desc">A pair's tsx and go halves share a key and talk over /gantry/ws: send fires a one-way handler, call awaits a result, and Go pushes events and state back to the tsx side.</desc>
+  <defs>
+    <marker id="pr-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- websocket channel (focal) -->
+  <text x="450" y="112" fill="#eb6c36" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">/gantry/ws</text>
+  <rect x="436" y="124" width="28" height="184" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+
+  <!-- arrows across the socket -->
+  <path d="M 264 156 H 636" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#pr-arrow)"/>
+  <path d="M 264 188 H 636" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#pr-arrow)"/>
+  <path d="M 636 220 H 264" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#pr-arrow)"/>
+  <path d="M 636 252 H 264" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#pr-arrow)"/>
+
+  <!-- arrow labels (left of channel for tsx->go, right for go->tsx) -->
+  <rect x="322" y="136" width="36" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="340" y="145" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">SEND</text>
+  <rect x="322" y="168" width="36" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="340" y="177" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">CALL</text>
+  <rect x="540" y="200" width="44" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="562" y="209" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">RESULT</text>
+  <rect x="516" y="232" width="92" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="562" y="241" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PUSH · ON / STATE</text>
+
+  <!-- tsx half -->
+  <rect x="48" y="132" width="216" height="152" rx="6" fill="#f5f5f5"/>
+  <rect x="48" y="132" width="216" height="152" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="56" y="140" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="71" y="149" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">TSX</text>
+  <text x="156" y="176" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">index.tsx</text>
+  <text x="156" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">usePaired()</text>
+  <text x="156" y="228" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">send · call · on · state</text>
+  <text x="156" y="260" fill="#7a8399" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">key: pages/index</text>
+
+  <!-- go half -->
+  <rect x="636" y="132" width="216" height="152" rx="6" fill="#f5f5f5"/>
+  <rect x="636" y="132" width="216" height="152" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="644" y="140" width="26" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="657" y="149" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">GO</text>
+  <text x="744" y="176" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">index.go</text>
+  <text x="744" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">ui.Page</text>
+  <text x="744" y="228" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">On · Call · Push</text>
+  <text x="744" y="260" fill="#7a8399" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">key: pages/index</text>
+
+  <!-- editorial aside -->
+  <text x="450" y="336" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="middle">Same key, two halves. send is fire-and-forget; call awaits a reply.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="384" x2="868" y2="384" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="400" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="120" y1="396" x2="150" y2="396" stroke="#4f5d75" stroke-width="1"/>
+  <text x="158" y="400" fill="#4f5d75" font-size="9">message</text>
+  <line x1="248" y1="396" x2="278" y2="396" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4"/>
+  <text x="286" y="400" fill="#4f5d75" font-size="9">awaited reply</text>
+  <rect x="392" y="391" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="408" y="400" fill="#4f5d75" font-size="9">one websocket</text>
+</svg>

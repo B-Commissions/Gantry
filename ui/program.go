@@ -4,7 +4,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"reflect"
 	"runtime/debug"
+	"strconv"
 	"sync"
 	"time"
 )
@@ -64,12 +66,14 @@ type program struct {
 	model    Model
 	handlers map[string]handlerFn // current render generation
 	prev     map[string]handlerFn // previous generation - an event racing a re-render still resolves
-	nextID   int
-	// deliver sends a serialized tree to the active client (and any
-	// observers); swapped by the server as connections and pages
-	// change. nil = page inactive. owner is the conn the delivery
+	// prevWire is the last serialized tree; the next render diffs against
+	// it to send a patch instead of the whole tree. nil until first render.
+	prevWire *wireNode
+	// deliver sends a render payload (full tree or a patch) to the active
+	// client (and any observers); swapped by the server as connections and
+	// pages change. nil = page inactive. owner is the conn the delivery
 	// belongs to, so a departing observer can't cut off the webview.
-	deliver func(tree wireNode)
+	deliver func(payload renderPayload)
 	owner   *conn
 	// report feeds recovered panics into the app's error pipeline.
 	report func(ErrorInfo)
@@ -186,7 +190,9 @@ func (p *program) send(msg Msg) {
 }
 
 // render serializes View with a fresh handler generation and delivers
-// the tree if the page is active.
+// it: a patch against the previous tree when one exists, else the full
+// tree. Delivery decides per client whether it actually needs the full
+// tree (a fresh or reconnected client always does).
 func (p *program) render() {
 	defer func() {
 		if r := recover(); r != nil {
@@ -198,31 +204,103 @@ func (p *program) render() {
 	p.mu.Lock()
 	p.prev = p.handlers
 	p.handlers = map[string]handlerFn{}
-	wire := p.serialize(tree)
+	full := p.serialize(tree, "")
+	pl := renderPayload{full: full}
+	if p.prevWire != nil {
+		diffTree(*p.prevWire, full, []int{}, &pl.ops)
+		pl.hasOps = true
+	}
+	saved := full
+	p.prevWire = &saved
 	deliver := p.deliver
 	p.mu.Unlock()
 
 	if deliver != nil {
-		deliver(wire)
+		deliver(pl)
 	}
 }
 
-// serialize walks the tree assigning handler IDs (caller holds p.mu).
-func (p *program) serialize(n Node) wireNode {
+// serialize walks the tree building the wire form and registering handler
+// IDs into the current generation (caller holds p.mu). A handler ID is the
+// node's path plus the event name, so an unchanged node keeps the same ID
+// across renders - which is what lets a diffed (unsent) node still resolve
+// its events against the current generation.
+func (p *program) serialize(n Node, path string) wireNode {
 	w := wireNode{Type: n.Type, Key: n.Key, Props: n.Props}
 	if len(n.handlers) > 0 {
 		w.Handlers = make(map[string]string, len(n.handlers))
 		for event, fn := range n.handlers {
-			p.nextID++
-			id := fmt.Sprintf("h%d", p.nextID)
+			id := path + ":" + event
 			p.handlers[id] = fn
 			w.Handlers[event] = id
 		}
 	}
-	for _, c := range n.Children {
-		w.Children = append(w.Children, p.serialize(c))
+	if len(n.Children) > 0 {
+		w.Children = make([]wireNode, 0, len(n.Children))
+		for i, c := range n.Children {
+			w.Children = append(w.Children, p.serialize(c, path+"."+strconv.Itoa(i)))
+		}
 	}
 	return w
+}
+
+// renderPayload is one render's output: the complete wire tree (for a
+// client that needs a full frame) and, when a previous tree existed, the
+// diff from it (for caught-up clients).
+type renderPayload struct {
+	full   wireNode
+	ops    []patchOp
+	hasOps bool
+}
+
+// patchOp is one edit to a client's wire tree. Path is the child-index
+// route from the root ([] = root). "replace" swaps the whole subtree at
+// Path with Node; "set" updates the Props and Handlers of the node at Path
+// while keeping its children, so unchanged descendants keep their identity
+// on the client and React skips re-rendering them.
+type patchOp struct {
+	Op       string            `json:"op"`
+	Path     []int             `json:"path"`
+	Node     *wireNode         `json:"node,omitempty"`
+	Props    map[string]any    `json:"props,omitempty"`
+	Handlers map[string]string `json:"handlers,omitempty"`
+}
+
+// diffTree compares prev and next at the same tree position and appends
+// edit ops. An identity change (type/key) or a child-count change emits a
+// coarse "replace" of the whole subtree; otherwise a "set" carries the new
+// props/handlers and each child is diffed in turn.
+func diffTree(prev, next wireNode, path []int, ops *[]patchOp) {
+	if prev.Type != next.Type || prev.Key != next.Key || len(prev.Children) != len(next.Children) {
+		n := next
+		*ops = append(*ops, patchOp{Op: "replace", Path: path, Node: &n})
+		return
+	}
+	if !propsEqual(prev.Props, next.Props) || !handlersEqual(prev.Handlers, next.Handlers) {
+		*ops = append(*ops, patchOp{Op: "set", Path: path, Props: next.Props, Handlers: next.Handlers})
+	}
+	for i := range next.Children {
+		childPath := make([]int, len(path)+1)
+		copy(childPath, path)
+		childPath[len(path)] = i
+		diffTree(prev.Children[i], next.Children[i], childPath, ops)
+	}
+}
+
+// propsEqual and handlersEqual treat nil and empty as equal, so a node
+// that alternates between no-props and an empty map does not churn.
+func propsEqual(a, b map[string]any) bool {
+	if len(a) == 0 && len(b) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(a, b)
+}
+
+func handlersEqual(a, b map[string]string) bool {
+	if len(a) == 0 && len(b) == 0 {
+		return true
+	}
+	return reflect.DeepEqual(a, b)
 }
 
 // handleEvent resolves a handler ID against the current, then previous,
@@ -245,7 +323,7 @@ func (p *program) handleEvent(id string, payload json.RawMessage) {
 
 // setDeliver activates render delivery on behalf of owner and pushes a
 // full render immediately.
-func (p *program) setDeliver(owner *conn, deliver func(wireNode)) {
+func (p *program) setDeliver(owner *conn, deliver func(renderPayload)) {
 	p.mu.Lock()
 	p.owner = owner
 	p.deliver = deliver

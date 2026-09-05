@@ -2,6 +2,8 @@
 
 Most pages have a fixed path (`pages/settings` -> `/settings`). A dynamic page instead captures part of the URL, so one page serves many addresses - `/examples/page1/1`, `/examples/page1/2`, `/user/jack`, `/files/docs/intro`. This is how you build pagination, detail pages, and anything keyed by an id or slug, and it follows the same paired-folder convention as every other [page](pages.md).
 
+![A URL is matched most-specific-first (static, then [id], then catch-all); the winning page receives the params in the tsx via useParams and in Go via ParamsMsg and App.Params.](dynamic-routes-resolve.svg)
+
 ## The convention
 
 Name a page folder with brackets, NextJS-style:

@@ -25,6 +25,7 @@ import (
 // server -> client:
 //
 //	{"t":"render","seq":1,"tree":{...}}          full tree for the active page
+//	{"t":"patch","seq":2,"ops":[...]}            edits against the last tree
 //	{"t":"push","key":"components/gauge","name":"state","p":<json>}     paired push
 type clientMsg struct {
 	T    string          `json:"t"`
@@ -57,6 +58,12 @@ type renderMsg struct {
 	Tree wireNode `json:"tree"`
 }
 
+type patchMsg struct {
+	T   string    `json:"t"`
+	Seq uint64    `json:"seq"`
+	Ops []patchOp `json:"ops"`
+}
+
 type pushMsg struct {
 	T    string `json:"t"`
 	Key  string `json:"key"`
@@ -80,6 +87,11 @@ type conn struct {
 	seq    uint64
 	page   string // active page key
 	closed bool
+	// hasBase reports whether this conn has received a full tree for the
+	// current page. Until it has, the next delivery must be a full tree,
+	// not a patch (a fresh/reconnected client, or one that just switched
+	// pages, has nothing to apply a patch against). Reset on every "ready".
+	hasBase bool
 }
 
 func (c *conn) write(v any) {
@@ -99,12 +111,21 @@ func (c *conn) write(v any) {
 	}
 }
 
-func (c *conn) sendRender(tree wireNode) {
+func (c *conn) sendFull(tree wireNode) {
+	c.mu.Lock()
+	c.seq++
+	seq := c.seq
+	c.hasBase = true
+	c.mu.Unlock()
+	c.write(renderMsg{T: "render", Seq: seq, Tree: tree})
+}
+
+func (c *conn) sendPatch(ops []patchOp) {
 	c.mu.Lock()
 	c.seq++
 	seq := c.seq
 	c.mu.Unlock()
-	c.write(renderMsg{T: "render", Seq: seq, Tree: tree})
+	c.write(patchMsg{T: "patch", Seq: seq, Ops: ops})
 }
 
 func (c *conn) push(key, event string, payload any) {
@@ -222,11 +243,26 @@ func (a *App) allClients() []*conn {
 
 // deliverTo builds a program's render-delivery function: the owning
 // conn (nil for an observers-only delivery) plus every observer at the
-// time of each render.
-func (a *App) deliverTo(owner *conn) func(wireNode) {
-	return func(tree wireNode) {
+// time of each render. Each conn gets the full tree if it has no base yet
+// (or the render carries no diff), otherwise the patch - and nothing at
+// all when a caught-up conn's diff is empty.
+func (a *App) deliverTo(owner *conn) func(renderPayload) {
+	send := func(c *conn, pl renderPayload) {
+		c.mu.Lock()
+		// Observers (the test driver, DOM-plane taps) always get full trees:
+		// they assert on the raw render frame and do not apply patches. Only
+		// the real webview client - where the render cost lives - is patched.
+		full := c.observer || !c.hasBase || !pl.hasOps
+		c.mu.Unlock()
+		if full {
+			c.sendFull(pl.full)
+		} else if len(pl.ops) > 0 {
+			c.sendPatch(pl.ops)
+		}
+	}
+	return func(pl renderPayload) {
 		if owner != nil {
-			owner.sendRender(tree)
+			send(owner, pl)
 		}
 		a.mu.Lock()
 		obs := make([]*conn, 0, len(a.observers))
@@ -237,7 +273,7 @@ func (a *App) deliverTo(owner *conn) func(wireNode) {
 		}
 		a.mu.Unlock()
 		for _, o := range obs {
-			o.sendRender(tree)
+			send(o, pl)
 		}
 	}
 }
@@ -254,10 +290,12 @@ func (a *App) readLoop(c *conn) {
 		}
 		switch msg.T {
 		case "ready":
-			// The client mounted a page: move render delivery to it.
+			// The client mounted a page: move render delivery to it. It has
+			// no tree for this page yet, so the next delivery must be full.
 			c.detach(a)
 			c.mu.Lock()
 			c.page = msg.Page
+			c.hasBase = false
 			c.mu.Unlock()
 			a.mu.Lock()
 			samePage := a.activePage == msg.Page

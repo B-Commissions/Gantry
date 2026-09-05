@@ -49,6 +49,31 @@ function resourceMime(file) {
   return RESOURCE_MIME[path.extname(file).toLowerCase()] || "application/octet-stream";
 }
 
+// readPageMeta statically extracts a page's routing-relevant exports
+// (route, layout, chrome) from its source, so a lazily-loaded page's
+// metadata is known before its module chunk is fetched. These must be
+// literal exports (the documented convention): the module is no longer
+// imported eagerly, so a computed value could not be read at route time.
+// Returns the raw source expressions, spliced verbatim into the module.
+function readPageMeta(tsxFile) {
+  let src = "";
+  try {
+    src = fs.readFileSync(tsxFile, "utf8");
+  } catch {
+    return {};
+  }
+  const meta = {};
+  const routeM = src.match(/export\s+const\s+route\s*=\s*("[^"]*"|'[^']*'|`[^`]*`)/);
+  if (routeM) meta.route = routeM[1];
+  const chromeM = src.match(/export\s+const\s+chrome\s*=\s*(true|false)\b/);
+  if (chromeM) meta.chrome = chromeM[1];
+  const layoutM = src.match(
+    /export\s+const\s+layout\s*=\s*(\[[^\]]*\]|"[^"]*"|'[^']*'|`[^`]*`|true|false)/,
+  );
+  if (layoutM) meta.layout = layoutM[1];
+  return meta;
+}
+
 /**
  * @param {{ appRoot?: string, goPort?: number }} [opts]
  * @returns {import("vite").Plugin}
@@ -119,19 +144,17 @@ export function gantry(opts = {}) {
       lines.push(`export const appConfig = null;`);
     }
 
-    pages.forEach((p, i) => {
-      lines.push(`import * as p${i} from ${JSON.stringify(p.tsx)};`);
-    });
+    // Pages are NOT eager-imported: each becomes a lazy loader so only the
+    // active page's code is in the initial bundle. Components stay eager -
+    // the Tea runtime looks them up by name synchronously at render time.
     components.forEach((c, i) => {
       lines.push(`import * as c${i} from ${JSON.stringify(c.tsx)};`);
     });
 
-    const pageEntries = pages.map((p, i) => {
-      // The derived route only; an optional "export const route" on the
-      // page module overrides it at runtime (createApp checks mod.route
-      // there - referencing it here would make rollup warn on every
-      // page that does not export it). Nested pages route by their
-      // path; an "index" leaf maps to the parent:
+    const pageEntries = pages.map((p) => {
+      // Derived route from the folder path; an "export const route" on the
+      // page overrides it. Nested pages route by their path; an "index"
+      // leaf maps to the parent:
       //   pages/index -> /, pages/account/settings -> /account/settings,
       //   pages/account/index -> /account
       let route;
@@ -142,9 +165,19 @@ export function gantry(opts = {}) {
       } else {
         route = "/" + p.name;
       }
-      return `{ key: ${JSON.stringify(p.key)}, route: ${JSON.stringify(route)}, mod: p${i} }`;
+      // Statically hoist route/layout/chrome so routing and layout
+      // selection work without loading the lazily-imported page module.
+      const meta = readPageMeta(p.tsx);
+      const fields = [
+        `key: ${JSON.stringify(p.key)}`,
+        `route: ${meta.route ?? JSON.stringify(route)}`,
+      ];
+      if (meta.chrome !== undefined) fields.push(`chrome: ${meta.chrome}`);
+      if (meta.layout !== undefined) fields.push(`layout: ${meta.layout}`);
+      fields.push(`load: () => import(${JSON.stringify(p.tsx)})`);
+      return `  { ${fields.join(", ")} }`;
     });
-    lines.push(`export const pages = [${pageEntries.join(", ")}];`);
+    lines.push(`export const pages = [\n${pageEntries.join(",\n")}\n];`);
 
     const compEntries = components.map((c, i) => `${JSON.stringify(c.key)}: c${i}`);
     lines.push(`export const components = { ${compEntries.join(", ")} };`);

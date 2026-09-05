@@ -3,7 +3,7 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "gantry-web": "file:D:/New Source/B_Commissions/Gantry/web",
+    "gantry-web": "file:/home/bluebeard/Projects/Personal/Gantry/web",
     "lucide-react": "^0.475.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"

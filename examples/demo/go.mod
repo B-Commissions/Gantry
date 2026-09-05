@@ -15,4 +15,4 @@ require (
 	golang.org/x/sys v0.41.0 // indirect
 )
 
-replace github.com/BlueBeard63/Gantry => "D:/New Source/B_Commissions/Gantry"
+replace github.com/BlueBeard63/Gantry => /home/bluebeard/Projects/Personal/Gantry

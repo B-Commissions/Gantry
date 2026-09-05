@@ -8,3 +8,4 @@ webdist/
 examples/demo/go.work.sum
 .claude/
 skills*
+design/

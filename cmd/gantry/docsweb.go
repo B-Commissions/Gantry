@@ -5,9 +5,11 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/fs"
 	"net"
 	"net/http"
 	"path"
+	"regexp"
 	"strings"
 
 	chromahtml "github.com/alecthomas/chroma/v2/formatters/html"
@@ -26,7 +28,7 @@ import (
 // serveDocsWeb renders the embedded docs to HTML, serves them from a
 // loopback port, and opens the browser. It is the default for
 // `gantry docs`; the terminal viewer stays reachable behind -tui.
-func serveDocsWeb(pages []docPage, start int, aiOn bool) error {
+func serveDocsWeb(pages []docPage, start int, aiOn bool, port int) error {
 	site, err := newDocsSite(pages, aiOn)
 	if err != nil {
 		return err
@@ -39,12 +41,18 @@ func serveDocsWeb(pages []docPage, start int, aiOn bool) error {
 		go ensureOllamaModel(site.aiCfg)
 	}
 
-	ln, err := launch.Listen(0) // 0 -> the OS hands us a free loopback port
+	// Prefer the requested (stable) port so the URL stays put across runs; fall
+	// back to an ephemeral port only if it is taken (e.g. another docs viewer).
+	ln, err := launch.Listen(port)
+	if err != nil && port != 0 {
+		info("docs port %d is busy - using an ephemeral port instead", port)
+		ln, err = launch.Listen(0)
+	}
 	if err != nil {
 		return err
 	}
-	port := ln.Addr().(*net.TCPAddr).Port
-	base := fmt.Sprintf("http://127.0.0.1:%d", port)
+	actualPort := ln.Addr().(*net.TCPAddr).Port
+	base := fmt.Sprintf("http://127.0.0.1:%d", actualPort)
 
 	// If a topic was matched, deep-link straight to that page.
 	openURL := base + site.firstRoute
@@ -74,6 +82,7 @@ type docsSite struct {
 	tmpl         *template.Template
 	manifest     docsManifest
 	pages        map[string]renderedPage
+	assets       map[string][]byte // inline image assets (svg/png) by route
 	firstRoute   string
 	version      string
 	searchJSON   []byte
@@ -138,6 +147,14 @@ func newDocsSite(pages []docPage, aiOn bool) (*docsSite, error) {
 		return nil, fmt.Errorf("parsing docs manifest: %w", err)
 	}
 
+	// Append one sidebar category per installed module. Best-effort: a bad
+	// module registry must not break the framework docs.
+	if cats, err := moduleNavCategories(); err != nil {
+		warn("skipping module docs nav: %v", err)
+	} else {
+		mf.Categories = append(mf.Categories, cats...)
+	}
+
 	tmpl, err := template.New("docs").Parse(docsShellHTML)
 	if err != nil {
 		return nil, err
@@ -192,6 +209,27 @@ func newDocsSite(pages []docPage, aiOn bool) (*docsSite, error) {
 		aiCfg:        newAIConfig(),
 	}
 
+	// Inline image assets (SVGs) by route: the framework-embedded ones plus any
+	// installed module's cached images (best-effort for modules). Built before
+	// the pages loop so page rendering can inline them.
+	site.assets = map[string][]byte{}
+	_ = fs.WalkDir(docs.FS, ".", func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() || strings.HasSuffix(p, ".md") || p == "manifest.json" {
+			return err
+		}
+		if b, err := docs.FS.ReadFile(p); err == nil {
+			site.assets["/"+p] = b
+		}
+		return nil
+	})
+	if ma, err := moduleDocAssets(); err != nil {
+		warn("skipping module docs images: %v", err)
+	} else {
+		for k, v := range ma {
+			site.assets[k] = v
+		}
+	}
+
 	// Pre-render every embedded page. Pages not named in the manifest
 	// (e.g. README.md) still render and are reachable by route; they just
 	// have no nav row.
@@ -201,6 +239,12 @@ func newDocsSite(pages []docPage, aiOn bool) (*docsSite, error) {
 		if err != nil {
 			return nil, fmt.Errorf("rendering %s: %w", p.path, err)
 		}
+		// Never let a module page (appended after the core pages) shadow a
+		// framework route.
+		if _, dup := site.pages[rp.Route]; dup {
+			warn("skipping duplicate doc route %s (from %s)", rp.Route, p.path)
+			continue
+		}
 		if t := navTitle[p.path]; t != "" {
 			rp.PageTitle = t
 		}
@@ -209,6 +253,8 @@ func newDocsSite(pages []docPage, aiOn bool) (*docsSite, error) {
 		} else {
 			rp.CategoryTitle = catTitle[p.category]
 		}
+		// Inline any diagram SVGs so they inherit the page theme (light/dark).
+		rp.Body = template.HTML(inlineDiagrams(string(rp.Body), rp.Route, site.assets)) //nolint:gosec // svg from our own embedded/cached assets
 		site.pages[rp.Route] = rp
 		searchDocs = append(searchDocs, searchDoc{
 			Title:    rp.PageTitle,
@@ -541,6 +587,11 @@ func (s *docsSite) handler() http.Handler {
 			http.Redirect(w, r, s.firstRoute, http.StatusFound)
 			return
 		}
+		if b, ok := s.assets[r.URL.Path]; ok {
+			w.Header().Set("Content-Type", assetContentType(r.URL.Path))
+			_, _ = w.Write(b)
+			return
+		}
 		rp, ok := s.pages[r.URL.Path]
 		if !ok {
 			http.NotFound(w, r)
@@ -573,4 +624,45 @@ type searchDoc struct {
 	Route    string `json:"route"`
 	Category string `json:"category"`
 	Text     string `json:"text"`
+}
+
+var docImgRe = regexp.MustCompile(`<img\b[^>]*>`)
+var imgSrcRe = regexp.MustCompile(`\bsrc="([^"]*)"`)
+
+// inlineDiagrams replaces <img> tags that point at an SVG asset with the SVG
+// inlined into the page, tagged `class="diagram"`. Inlining (rather than a
+// plain <img>) lets the diagram inherit the page's theme, so it follows the
+// light/dark toggle. Non-SVG images and unknown sources are left untouched.
+func inlineDiagrams(html, pageRoute string, assets map[string][]byte) string {
+	dir := path.Dir(pageRoute)
+	return docImgRe.ReplaceAllStringFunc(html, func(tag string) string {
+		m := imgSrcRe.FindStringSubmatch(tag)
+		if m == nil || !strings.HasSuffix(m[1], ".svg") {
+			return tag
+		}
+		route := m[1]
+		if !strings.HasPrefix(route, "/") {
+			route = path.Clean(path.Join(dir, route))
+		}
+		if svg, ok := assets[route]; ok {
+			return strings.Replace(string(svg), "<svg ", `<svg class="diagram" `, 1)
+		}
+		return tag
+	})
+}
+
+// assetContentType maps an image asset route to its MIME type.
+func assetContentType(p string) string {
+	switch {
+	case strings.HasSuffix(p, ".svg"):
+		return "image/svg+xml"
+	case strings.HasSuffix(p, ".png"):
+		return "image/png"
+	case strings.HasSuffix(p, ".jpg"), strings.HasSuffix(p, ".jpeg"):
+		return "image/jpeg"
+	case strings.HasSuffix(p, ".gif"):
+		return "image/gif"
+	default:
+		return "application/octet-stream"
+	}
 }

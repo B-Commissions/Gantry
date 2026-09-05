@@ -29,10 +29,12 @@ import (
 	"log"
 	"net"
 	"net/http"
+	nethttppprof "net/http/pprof"
 	"os"
 	"os/signal"
 	"path/filepath"
 	"strconv"
+	"time"
 
 	"github.com/BlueBeard63/Gantry/appicon"
 	"github.com/BlueBeard63/Gantry/appshell"
@@ -227,6 +229,7 @@ type runFlags struct {
 }
 
 func run(cfg Config, f runFlags) error {
+	start := time.Now()
 	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
 	defer cancel()
 
@@ -245,6 +248,18 @@ func run(cfg Config, f runFlags) error {
 	mux.Handle("/gantry/ws", app.Handler())
 	mux.Handle("/gantry/widgets.json", widgetsHandler())
 	mux.Handle("/gantry/notify/action", notifyActionHandler())
+	// pprof for profiling the running app, off in production unless
+	// GANTRY_PPROF=1. Mounted on this mux (not DefaultServeMux) so it sits
+	// behind the same local-only server; pprof.Index also serves the named
+	// runtime profiles (/debug/pprof/heap, /goroutine, ...).
+	if pprofEnabled() {
+		mux.HandleFunc("/debug/pprof/", nethttppprof.Index)
+		mux.HandleFunc("/debug/pprof/cmdline", nethttppprof.Cmdline)
+		mux.HandleFunc("/debug/pprof/profile", nethttppprof.Profile)
+		mux.HandleFunc("/debug/pprof/symbol", nethttppprof.Symbol)
+		mux.HandleFunc("/debug/pprof/trace", nethttppprof.Trace)
+		log.Printf("perf: pprof enabled at /debug/pprof/")
+	}
 	// Built-in app identity for the frontend: useAppInfo() /
 	// call("gantry", "appInfo") resolve name, title and the version
 	// stamped from gantry.json. Registered before Setup so an app can
@@ -302,7 +317,14 @@ func run(cfg Config, f runFlags) error {
 	// catch-all does not swallow /resources/* into index.html; the
 	// ServeMux longest-prefix match makes "/resources/" win regardless.
 	if appResources != nil {
-		mux.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.FS(appResources))))
+		res := http.StripPrefix("/resources/", http.FileServer(http.FS(appResources)))
+		mux.Handle("/resources/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Embedded resources are referenced by stable path (not content-
+			// hashed), so revalidate rather than cache-forever: a new app
+			// build may change the bytes behind the same URL.
+			w.Header().Set("Cache-Control", "no-cache")
+			res.ServeHTTP(w, r)
+		}))
 	}
 	if cfg.Setup != nil {
 		cfg.Setup(app, mux)
@@ -319,6 +341,9 @@ func run(cfg Config, f runFlags) error {
 	server := &http.Server{Handler: tokenHandler(f.token, recoverHandler(app, mux))}
 	errCh := make(chan error, 1)
 	go func() { errCh <- server.Serve(ln) }()
+	if perfEnabled() {
+		log.Printf("perf: listen+serve=%dms", time.Since(start).Milliseconds())
+	}
 	go func() {
 		<-ctx.Done()
 		_ = server.Close()
@@ -395,7 +420,31 @@ func run(cfg Config, f runFlags) error {
 			Menu:    cfg.TrayMenu,
 		}
 	}
+	if perfEnabled() {
+		log.Printf("perf: opening window=%dms (first paint follows in the frontend perf log)", time.Since(start).Milliseconds())
+	}
 	return shell.Run(ctx, cancel)
+}
+
+// perfEnabled reports whether startup timing should be logged: on in
+// development, or forced with GANTRY_PERF=1.
+func perfEnabled() bool {
+	switch os.Getenv("GANTRY_PERF") {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return IsDev()
+}
+
+// pprofEnabled reports whether the pprof endpoints should be mounted: on
+// in development, or forced with GANTRY_PPROF=1. Off in a shipped binary
+// unless explicitly enabled.
+func pprofEnabled() bool {
+	switch os.Getenv("GANTRY_PPROF") {
+	case "1", "true", "yes", "on":
+		return true
+	}
+	return IsDev()
 }
 
 func geometryPath(name string) string {

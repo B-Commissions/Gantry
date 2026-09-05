@@ -57,7 +57,32 @@ import react from "@vitejs/plugin-react";
 
 export default defineConfig({
   plugins: [%sreact(), gantry({ appRoot: ".." })],
-  build: { outDir: "../webdist", emptyOutDir: true },
+  build: {
+    outDir: "../webdist",
+    emptyOutDir: true,
+    // WebView2 (Edge/Chromium) and modern WebKitGTK both support ES2022;
+    // a modern target ships smaller, faster-parsing output. Matches the
+    // tsconfig target.
+    target: "es2022",
+    // No source maps in production output (they inflate the build and are
+    // only useful for the dev server, which makes its own).
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        // Keep the React runtime in its own chunk: it rarely changes, so
+        // it stays cached across navigations and app updates.
+        manualChunks(id) {
+          if (
+            id.includes("/node_modules/react/") ||
+            id.includes("/node_modules/react-dom/") ||
+            id.includes("/node_modules/scheduler/")
+          ) {
+            return "react";
+          }
+        },
+      },
+    },
+  },
 });
 `, twImport, twPlugin)
 

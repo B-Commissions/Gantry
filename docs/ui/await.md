@@ -2,6 +2,8 @@
 
 While a [Go call](calls.md) is in flight you usually want a placeholder, not a blank area, and when it fails you want a retry, not a silent gap. `Await` and `Skeleton` are the two components that turn a `useCall` result into that UI declaratively. `Await` reads the `CallResult` and picks one of three renders - loading, error, or content - and `Skeleton` is the shimmering placeholder you hand it as a fallback. Neither is mandatory: the `loading`/`error`/`data` fields of a [`CallResult`](calls.md#the-callresult-shape) are right there for hand-rolled arrangements. But for the common case these two are one import.
 
+![Await shows the fallback while loading, then the content when the call resolves or an error card with Retry when it rejects; Retry re-runs the call, returning to loading.](await-states.svg)
+
 ## Await
 
 `Await` is the declarative wrapper around a `useCall` result. It shows your fallback while loading, an error card with a Retry button on failure, and your content once data lands:

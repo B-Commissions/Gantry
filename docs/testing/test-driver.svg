@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 400" width="900" height="400" role="img" aria-labelledby="test-title test-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="test-title">How the gantrytest driver drives the real app</title>
+  <desc id="test-desc">gantrytest.Launch builds and starts the real app, then drives it on two planes: the protocol plane speaks the /gantry/ws wire protocol to the Go process, and the optional DOM plane drives the webview over CDP.</desc>
+  <defs>
+    <marker id="td-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="td-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- app boundary -->
+  <rect x="520" y="88" width="344" height="232" rx="8" fill="rgba(45,49,66,0.02)" stroke="rgba(45,49,66,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+  <text x="536" y="112" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.12em">THE REAL APP · HEADLESS, HERMETIC</text>
+
+  <!-- arrows -->
+  <path d="M 240 184 H 396 V 164 H 552" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#td-arrow-accent)"/>
+  <path d="M 240 216 H 420 V 268 H 552" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#td-arrow)"/>
+
+  <!-- arrow labels -->
+  <rect x="266" y="142" width="120" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="326" y="151" fill="#eb6c36" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PROTOCOL · /gantry/ws</text>
+  <rect x="266" y="230" width="128" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="330" y="239" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">DOM · CDP · WithDOM()</text>
+
+  <!-- driver (focal) -->
+  <rect x="40" y="152" width="200" height="96" rx="6" fill="#f5f5f5"/>
+  <rect x="40" y="152" width="200" height="96" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <rect x="48" y="160" width="44" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+  <text x="70" y="169" fill="#eb6c36" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">TEST</text>
+  <text x="140" y="196" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">gantrytest driver</text>
+  <text x="140" y="214" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">Launch(t)</text>
+  <text x="140" y="230" fill="#7a8399" font-size="9" text-anchor="middle">a plain Go test</text>
+
+  <!-- Go process -->
+  <rect x="552" y="128" width="280" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="552" y="128" width="280" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="560" y="136" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="575" y="145" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">APP</text>
+  <text x="692" y="166" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Go process</text>
+  <text x="692" y="184" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">server + Tea loop</text>
+
+  <!-- webview -->
+  <rect x="552" y="232" width="280" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="552" y="232" width="280" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="560" y="240" width="34" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="577" y="249" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">VIEW</text>
+  <text x="692" y="270" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">webview</text>
+  <text x="692" y="288" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">devtools protocol (CDP)</text>
+
+  <!-- aside -->
+  <text x="40" y="300" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">The driver drives the real app,</text>
+  <text x="40" y="320" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">not a mock of the wire protocol.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="364" x2="868" y2="364" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="380" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">PLANES</text>
+  <line x1="120" y1="377" x2="150" y2="377" stroke="#eb6c36" stroke-width="1.2"/>
+  <text x="158" y="380" fill="#4f5d75" font-size="9">protocol plane (headless, always on)</text>
+  <line x1="420" y1="377" x2="450" y2="377" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="458" y="380" fill="#4f5d75" font-size="9">DOM plane (opt in with WithDOM)</text>
+</svg>

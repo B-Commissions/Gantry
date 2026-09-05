@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 380" width="900" height="380" role="img" aria-labelledby="dyn-title dyn-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="dyn-title">How a dynamic route resolves and delivers params</title>
+  <desc id="dyn-desc">A URL is matched most-specific-first (static, then [id], then [...slug]); the winning page receives the captured params in the tsx via useParams and in Go via ParamsMsg and App.Params.</desc>
+  <defs>
+    <marker id="dr-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="dr-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- arrows -->
+  <path d="M 212 188 H 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#dr-arrow)"/>
+  <path d="M 532 164 H 572 V 148 H 620" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#dr-arrow)"/>
+  <path d="M 532 212 H 584 V 268 H 620" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#dr-arrow)"/>
+
+  <!-- arrow labels -->
+  <rect x="220" y="166" width="44" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="242" y="175" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">MATCH</text>
+  <rect x="540" y="126" width="52" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="566" y="135" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PARAMS</text>
+  <rect x="540" y="286" width="76" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="578" y="295" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">PARAMSMSG</text>
+
+  <!-- URL -->
+  <rect x="32" y="152" width="180" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="32" y="152" width="180" height="72" rx="6" fill="rgba(79,93,117,0.1)" stroke="#7a8399" stroke-width="1"/>
+  <rect x="40" y="160" width="30" height="12" rx="2" fill="transparent" stroke="rgba(122,131,153,0.7)" stroke-width="0.8"/>
+  <text x="55" y="169" fill="#7a8399" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">URL</text>
+  <text x="122" y="196" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">a URL</text>
+  <text x="122" y="212" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">/files/docs/intro</text>
+
+  <!-- route match (focal) -->
+  <rect x="300" y="124" width="232" height="128" rx="6" fill="#f5f5f5"/>
+  <rect x="300" y="124" width="232" height="128" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="416" y="150" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">route match</text>
+  <text x="320" y="176" fill="#4f5d75" font-size="10" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">1  static  (exact)</text>
+  <text x="320" y="196" fill="#4f5d75" font-size="10" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">2  [id]  one segment</text>
+  <text x="320" y="216" fill="#4f5d75" font-size="10" font-family="ui-monospace, SFMono-Regular, Menlo, monospace">3  [...slug]  catch-all</text>
+  <text x="416" y="238" fill="#7a8399" font-size="9" text-anchor="middle">most specific wins</text>
+
+  <!-- tsx -->
+  <rect x="620" y="112" width="232" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="620" y="112" width="232" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="628" y="120" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="643" y="129" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">TSX</text>
+  <text x="736" y="150" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">the tsx half</text>
+  <text x="736" y="168" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">useParams()</text>
+
+  <!-- Go -->
+  <rect x="620" y="232" width="232" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="620" y="232" width="232" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="628" y="240" width="26" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="641" y="249" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">GO</text>
+  <text x="736" y="270" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">the Go half</text>
+  <text x="736" y="288" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">ParamsMsg · App.Params()</text>
+
+  <!-- aside -->
+  <text x="122" y="300" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">The same page stays</text>
+  <text x="122" y="318" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">mounted as the param</text>
+  <text x="122" y="336" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">changes; both halves</text>
+  <text x="122" y="354" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">get the new value.</text>
+</svg>

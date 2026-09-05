@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" width="820" height="460" role="img" aria-labelledby="proto-title proto-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="proto-title">What travels over the /gantry/ws websocket</title>
+  <desc id="proto-desc">The client sends ready on mount and the server replies with a full render; a user event triggers a coalesced re-render; an awaited call is answered by a reply carrying a value or an error.</desc>
+  <defs>
+    <marker id="ps-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="ps-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- lifelines -->
+  <line x1="200" y1="88" x2="200" y2="396" stroke="rgba(45,49,66,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+  <line x1="620" y1="88" x2="620" y2="396" stroke="rgba(45,49,66,0.25)" stroke-width="1" stroke-dasharray="4,4"/>
+
+  <!-- messages -->
+  <path d="M 200 124 H 620" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ps-arrow)"/>
+  <path d="M 620 168 H 200" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#ps-arrow-accent)"/>
+  <path d="M 200 224 H 620" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ps-arrow)"/>
+  <path d="M 620 260 H 200" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ps-arrow)"/>
+  <path d="M 200 316 H 620" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ps-arrow)"/>
+  <path d="M 620 352 H 200" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#ps-arrow)"/>
+
+  <!-- message labels -->
+  <rect x="342" y="104" width="136" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="113" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">ready · page, params</text>
+  <rect x="346" y="148" width="128" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="157" fill="#eb6c36" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">render · seq, tree</text>
+  <rect x="356" y="204" width="108" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="213" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">event · h, p</text>
+  <rect x="344" y="240" width="132" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="249" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">render (coalesced)</text>
+  <rect x="368" y="296" width="84" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="305" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">call · id</text>
+  <rect x="344" y="332" width="132" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="341" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">reply · id, ok / err</text>
+
+  <!-- actor headers -->
+  <rect x="120" y="40" width="160" height="48" rx="6" fill="#f5f5f5"/>
+  <rect x="120" y="40" width="160" height="48" rx="6" fill="rgba(79,93,117,0.1)" stroke="#7a8399" stroke-width="1"/>
+  <text x="200" y="62" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">client</text>
+  <text x="200" y="78" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">gantry-web</text>
+
+  <rect x="540" y="40" width="160" height="48" rx="6" fill="#f5f5f5"/>
+  <rect x="540" y="40" width="160" height="48" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="620" y="62" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">server</text>
+  <text x="620" y="78" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">ui/server.go</text>
+
+  <!-- editorial aside -->
+  <text x="200" y="388" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="middle">Newest connection wins and re-sends ready on reconnect.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="424" x2="788" y2="424" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="440" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+  <line x1="120" y1="437" x2="150" y2="437" stroke="#4f5d75" stroke-width="1"/>
+  <text x="158" y="440" fill="#4f5d75" font-size="9">frame</text>
+  <line x1="224" y1="437" x2="254" y2="437" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4"/>
+  <text x="262" y="440" fill="#4f5d75" font-size="9">reply to a call</text>
+  <rect x="360" y="432" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="376" y="440" fill="#4f5d75" font-size="9">full-tree render</text>
+</svg>

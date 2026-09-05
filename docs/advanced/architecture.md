@@ -2,6 +2,8 @@
 
 How a Gantry app actually runs: the processes it spawns, the transports between them, and the build pipeline that turns source into a single binary. This page is the mental model; the [wire protocol](protocol.md), [Windows internals](win32-notes.md) and [manual wiring](without-the-cli.md) pages drill into the pieces.
 
+![One binary runs the main process (a loopback HTTP server and a native webview), spawns a child process per widget and popup, and connects the webview to Go over a one-way bridge and the /gantry/ws websocket.](architecture-processes.svg)
+
 ## The process shape
 
 ```

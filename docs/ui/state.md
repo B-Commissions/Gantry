@@ -2,6 +2,8 @@
 
 `useGoState` is a `useState` whose value lives in Go and syncs both ways instantly. Reach for it when a value is owned by both sides - volume, active session, feature toggles - and every subscriber should re-render the moment it changes, from React or from Go. For asking Go a one-off question, see [Awaited Go calls](calls.md); for Go-driven UI, a [Tea Model](tea-model.md).
 
+![useGoState is a value declared in Go with ui.NewState; a Go Set pushes it to React, and a React setVolume writes it back to Go, firing OnChange, over one websocket.](state-flow.svg)
+
 ## Declaring shared state in Go
 
 Declare the variable once, at startup, **before the frontend connects**, with `ui.NewState(app, name, initial)`. It is generic, so the value type is inferred from `initial`:

@@ -2,6 +2,8 @@
 
 Gantry ships with crash detection on by default. A React render crash shows an error screen instead of a white window; a Go panic in a handler surfaces in the frontend instead of vanishing into a log line; even a hard process crash leaves a trace that the next launch reports. Every captured error carries the page the user was on and a breadcrumb trail of the actions that led there, so a report reads as a story ("was on /settings, clicked save, auth.login failed, then the panic") rather than a bare stack. Everything is interceptable and replaceable per app, on both the Go and the React side. The Go half lives in `ui/errors.go` (capture, ring buffer, hook) and `gantry/errors.go` (`gantry.Go`, the crash log, the HTTP recover wrapper); the React half in `web/src/errors.ts`.
 
+![A captured error is stamped with the page and breadcrumb trail, passed to the OnError hook which may suppress it, recorded in a ring buffer of the last 20, then pushed to the frontend error UI.](errors-pipeline.svg)
+
 ## What gets caught
 
 | Kind | Code | What happened | Result |

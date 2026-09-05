@@ -29,6 +29,7 @@ gantry docs --mcp            run as a stdio MCP server for coding agents
 Flags:
 
 - `-tui` (bool, default: false) - browse in the terminal (a Bubble Tea viewer) instead of the web viewer.
+- `--port N` (int, default: **8331**) - the port the web viewer binds, so the URL stays stable across runs and you can bookmark it. If that port is already in use (say a second docs viewer), the viewer falls back to an ephemeral port and prints the one it actually bound. Pass `--port 0` to always take an ephemeral port.
 - `--ai` (bool, default: false) - enable the opt-in docs assistant: a chat widget in the web viewer, grounded on the docs (it retrieves the most relevant pages per question and cites them). The backend is pluggable - see [The docs assistant](#the-docs-assistant) below. The docs stay fully offline; the assistant is purely additive.
 - `--mcp` (bool, default: false) - run a headless stdio MCP server that exposes the docs to coding agents, instead of opening a viewer - see [The MCP server](#the-mcp-server) below. No web server, no authentication.
 - `--print` (bool, default: false) - print the selected page as plain markdown to stdout and exit (good for piping or grepping).
@@ -50,7 +51,7 @@ The left pane holds a search box and the category tree, the right pane the page.
 
 ### The MCP server
 
-`gantry docs --mcp` runs a local [Model Context Protocol](https://modelcontextprotocol.io) server over stdin/stdout instead of opening a viewer, so a coding agent working on a Gantry project can pull these docs for reference. It exposes three tools over the same embedded pages - `search_docs` (rank pages by a query), `read_doc` (the full markdown of a page by its route), and `list_docs` (the whole index). It needs **no network and no authentication**: the agent spawns `gantry docs --mcp` as a subprocess and talks to it directly over the pipe. Add it once to Claude Code with:
+`gantry docs --mcp` runs a local [Model Context Protocol](https://modelcontextprotocol.io) server over stdin/stdout instead of opening a viewer, so a coding agent working on a Gantry project can pull these docs for reference. It exposes three tools over the same embedded pages - `search_docs` (rank pages by a query), `read_doc` (the full markdown of a page by its route), and `list_docs` (the whole index). Any modules you have installed (see [Module commands](modules.md)) are part of the same corpus, so `search_docs` and `list_docs` return their pages alongside the framework docs; pass an optional `namespace` argument to either tool to scope it to one module. It needs **no network and no authentication**: the agent spawns `gantry docs --mcp` as a subprocess and talks to it directly over the pipe. Add it once to Claude Code with:
 
 ```
 claude mcp add gantry-docs -- gantry docs --mcp

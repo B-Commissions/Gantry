@@ -34,18 +34,24 @@ func serveDocsMCP(pages []docPage) error {
 	}, nil)
 
 	type searchInput struct {
-		Query string `json:"query" jsonschema:"keywords or an error message to search the docs for"`
-		Limit int    `json:"limit,omitempty" jsonschema:"maximum pages to return (default 6, max 20)"`
+		Query     string `json:"query" jsonschema:"keywords or an error message to search the docs for"`
+		Limit     int    `json:"limit,omitempty" jsonschema:"maximum pages to return (default 6, max 20)"`
+		Namespace string `json:"namespace,omitempty" jsonschema:"optional: restrict results to one section/module namespace, e.g. whitegantry (omit to search everything)"`
 	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "search_docs",
-		Description: "Search the Gantry documentation. Returns the most relevant pages with their route and a snippet. Use this first to find the right page, then read_doc to read it.",
+		Description: "Search the Gantry documentation (framework docs plus any installed modules). Returns the most relevant pages with their route and a snippet. Use this first to find the right page, then read_doc to read it. Pass namespace to scope to one module.",
 	}, func(_ context.Context, _ *mcp.CallToolRequest, in searchInput) (*mcp.CallToolResult, any, error) {
 		k := in.Limit
 		if k <= 0 || k > 20 {
 			k = 6
 		}
-		hits := site.retrieve(in.Query, k)
+		var hits []aiDoc
+		if in.Namespace != "" {
+			hits = retrieveFrom(site.aiDocsIn(in.Namespace), in.Query, k)
+		} else {
+			hits = site.retrieve(in.Query, k)
+		}
 		var b strings.Builder
 		if len(hits) == 0 {
 			b.WriteString("No pages matched. Use list_docs to browse every page.\n")
@@ -74,11 +80,14 @@ func serveDocsMCP(pages []docPage) error {
 		return textResult(d.Raw), nil, nil
 	})
 
+	type listInput struct {
+		Namespace string `json:"namespace,omitempty" jsonschema:"optional: list only one section/module namespace, e.g. whitegantry (omit to list every page)"`
+	}
 	mcp.AddTool(server, &mcp.Tool{
 		Name:        "list_docs",
-		Description: "List every Gantry documentation page (title, route, category) so you can pick one to read_doc.",
-	}, func(_ context.Context, _ *mcp.CallToolRequest, _ struct{}) (*mcp.CallToolResult, any, error) {
-		return textResult(site.aiTOC), nil, nil
+		Description: "List Gantry documentation pages (framework docs plus any installed modules) as title, route and category, so you can pick one to read_doc. Pass namespace to list just one module.",
+	}, func(_ context.Context, _ *mcp.CallToolRequest, in listInput) (*mcp.CallToolResult, any, error) {
+		return textResult(site.tocFor(in.Namespace)), nil, nil
 	})
 
 	// Run blocks until the client disconnects; a clean stdin EOF is a normal

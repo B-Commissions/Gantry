@@ -2,6 +2,8 @@
 
 Gantry runs the same Go app on a phone: the Go server cross-compiles for Android and runs on-device as a child process, and a thin generated Kotlin shell points a full-screen WebView at it on `127.0.0.1`. There is no gomobile and no Java in your project - the whole Android side is synthesized into `.gantry/android/` on every build, the same way the Vite root is. This page is about building and running on Android; home-screen [Widgets](widgets.md) and system [Notifications](notifications.md) each have their own page.
 
+![gantry mobile dev android checks the toolchain, finds the one USB device, builds an APK for its ABI, installs and launches it, then streams the app's logcat under the gantry-go tag.](android-loop.svg)
+
 ## Run it on your phone
 
 `gantry mobile dev android` is the phone equivalent of `gantry dev`. It checks the toolchain (and **offers to install** what's missing), finds the one USB device, builds the APK for that device's ABI, installs it, launches `<your.id>/.MainActivity`, clears the old log with `adb logcat -c` and then streams the app's logcat (tag `gantry-go`) into your terminal until Ctrl+C:
