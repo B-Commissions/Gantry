@@ -2,6 +2,8 @@
 
 What travels over `/gantry/ws`, the app-level transport described in [Architecture](architecture.md). You never speak this by hand - `gantry-web` (`web/src/socket.ts`) does on the client, `ui/server.go` does on the server - but knowing it makes debugging in the network tab trivial. All messages are **JSON** text frames with a `"t"` discriminator. The Go structs are `clientMsg`, `renderMsg`, `pushMsg`, `replyMsg`, `stateMsg` in `ui/server.go`.
 
+![The client sends ready on mount and the server replies with a full render; a user event triggers a coalesced re-render; an awaited call is answered by a reply carrying a value or an error.](protocol-sequence.svg)
+
 ## Client -> server
 
 ```json

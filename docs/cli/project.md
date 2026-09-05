@@ -27,6 +27,8 @@ gantry new <name> [flags]
 
 ## gantry build
 
+![gantry build regenerates the synthesized root and generated Go, runs one vite build into webdist, then compiles a go build per target that embeds webdist, producing a single executable per os and arch under dist.](build-pipeline.svg)
+
 Builds the frontend once, then compiles every configured target into a per-OS/arch release tree under `dist/`:
 
 ```

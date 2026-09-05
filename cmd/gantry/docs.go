@@ -34,6 +34,7 @@ func cmdDocs(args []string) error {
 	frameSize := fs.String("size", "", "WxH to force the -frame size, e.g. 188x41 (when redirecting to a file)")
 	ai := fs.Bool("ai", false, "enable the on-device docs assistant (agent CLI like Claude Code/Codex if installed, else a local model)")
 	mcpMode := fs.Bool("mcp", false, "run a stdio MCP server exposing the docs (search_docs/read_doc/list_docs) - no auth; add with: claude mcp add gantry-docs -- gantry docs --mcp")
+	port := fs.Int("port", 8331, "port for the docs web viewer, so the URL stays stable across runs (0 picks an ephemeral port)")
 	if err := fs.Parse(args); err != nil {
 		return err
 	}
@@ -64,7 +65,7 @@ func cmdDocs(args []string) error {
 
 	// The web viewer is the default; -tui keeps the terminal browser.
 	if !*tui {
-		return serveDocsWeb(pages, start, *ai)
+		return serveDocsWeb(pages, start, *ai, *port)
 	}
 
 	m := newDocsModel(pages, start)
@@ -145,12 +146,31 @@ func loadDocs() ([]docPage, error) {
 	if len(pages) == 0 {
 		return nil, fmt.Errorf("no docs embedded (build the CLI from the Gantry repo)")
 	}
-	// README first, then category order matching the reading order.
+
+	// Fold in installed-module docs. Best-effort: the framework docs must still
+	// serve if a module's cache is unreadable.
+	if mods, err := moduleDocPages(); err != nil {
+		warn("skipping module docs: %v", err)
+	} else {
+		pages = append(pages, mods...)
+	}
+
+	// README first, then the framework reading order; installed modules sort
+	// after (rank 100), grouped by namespace.
 	rank := map[string]int{"": 0, "getting-started": 1, "shell": 2, "ui": 3, "mobile": 4, "testing": 5, "cli": 6, "advanced": 7}
+	rankOf := func(cat string) int {
+		if r, ok := rank[cat]; ok {
+			return r
+		}
+		return 100
+	}
 	sort.SliceStable(pages, func(i, j int) bool {
-		ri, rj := rank[pages[i].category], rank[pages[j].category]
+		ri, rj := rankOf(pages[i].category), rankOf(pages[j].category)
 		if ri != rj {
 			return ri < rj
+		}
+		if pages[i].category != pages[j].category {
+			return pages[i].category < pages[j].category
 		}
 		return pages[i].path < pages[j].path
 	})

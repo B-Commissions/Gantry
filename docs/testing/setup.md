@@ -4,6 +4,8 @@ Gantry ships an end-to-end test driver that drives the real running app - the re
 
 This page gets a first test running and documents the `gantry test` command and what `Launch` sets up. From there, the protocol-plane API is split across [pages & the tree](pages-and-tree.md), [events & calls](events-and-calls.md) and [state, pushes & restarts](state-and-restarts.md); [the DOM plane](dom.md) covers real clicks and screenshots, [errors and artifacts](errors-and-artifacts.md) covers error assertions and traces, [widget snapshots](widgets.md) covers host-side widget tests, [mobile](mobile.md) covers device testing, and [CI](ci.md) covers pipelines.
 
+![gantrytest.Launch builds and starts the real app, then drives it on two planes: the protocol plane speaks the /gantry/ws wire protocol to the Go process, and the optional DOM plane drives the webview over CDP.](test-driver.svg)
+
 ## Your first test
 
 Create a `tests/` directory at the app root (next to `gantry.json`) and add a Go test file whose package is `tests`. `gantry new` scaffolds a first `tests/smoke_test.go` for you, so a fresh app is testable out of the box. The driver finds the app root by walking up from the test's working directory to the nearest `gantry.json`, so the file just has to live somewhere under the app.

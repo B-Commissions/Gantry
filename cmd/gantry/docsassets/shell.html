@@ -169,7 +169,40 @@ header {
 }
 .markdown th, .markdown td { border:1px solid var(--border); padding:7px 12px; text-align:left; }
 .markdown th { background:var(--surface); font-weight:600; }
-.markdown img { max-width:100%; }
+.markdown img { max-width:100%; height:auto; }
+/* Inlined diagrams inherit the page theme. The rules below remap the diagrams'
+   baked editorial palette to the docs theme variables, so they follow the
+   light/dark toggle; currentColor and var() are theme-aware, so no per-theme
+   duplication is needed. The coral accent maps to the docs accent. */
+.markdown .diagram { display:block; max-width:100%; height:auto; margin:20px auto; border:1px solid var(--border); border-radius:8px; color:var(--fg); background:var(--bg); }
+.markdown .diagram [fill="#2d3142"]{fill:currentColor}
+.markdown .diagram [stroke="#2d3142"]{stroke:currentColor}
+.markdown .diagram [fill="#4f5d75"]{fill:currentColor;fill-opacity:.72}
+.markdown .diagram [stroke="#4f5d75"]{stroke:currentColor;stroke-opacity:.72}
+.markdown .diagram [fill="#7a8399"]{fill:currentColor;fill-opacity:.55}
+.markdown .diagram [stroke="#7a8399"]{stroke:currentColor;stroke-opacity:.55}
+.markdown .diagram [fill="rgba(45,49,66,0.8)"]{fill:currentColor;fill-opacity:.8}
+.markdown .diagram [stroke="rgba(45,49,66,0.4)"]{stroke:currentColor;stroke-opacity:.4}
+.markdown .diagram [stroke="rgba(45,49,66,0.3)"]{stroke:currentColor;stroke-opacity:.3}
+.markdown .diagram [stroke="rgba(45,49,66,0.25)"]{stroke:currentColor;stroke-opacity:.25}
+.markdown .diagram [stroke="rgba(45,49,66,0.1)"]{stroke:currentColor;stroke-opacity:.1}
+.markdown .diagram [fill="rgba(45,49,66,0.05)"]{fill:currentColor;fill-opacity:.05}
+.markdown .diagram [fill="rgba(45,49,66,0.03)"]{fill:currentColor;fill-opacity:.03}
+.markdown .diagram [fill="rgba(45,49,66,0.02)"]{fill:currentColor;fill-opacity:.02}
+.markdown .diagram [fill="rgba(79,93,117,0.1)"]{fill:currentColor;fill-opacity:.1}
+.markdown .diagram [fill="rgba(79,93,117,0.12)"]{fill:currentColor;fill-opacity:.12}
+.markdown .diagram [stroke="rgba(79,93,117,0.7)"]{stroke:currentColor;stroke-opacity:.7}
+.markdown .diagram [stroke="rgba(79,93,117,0.5)"]{stroke:currentColor;stroke-opacity:.5}
+.markdown .diagram [stroke="rgba(122,131,153,0.7)"]{stroke:currentColor;stroke-opacity:.7}
+.markdown .diagram [stroke="rgba(122,131,153,0.6)"]{stroke:currentColor;stroke-opacity:.6}
+.markdown .diagram [fill="#f5f5f5"]{fill:var(--bg)}
+.markdown .diagram [fill="#ffffff"]{fill:var(--surface)}
+.markdown .diagram [fill="#fdeee6"]{fill:var(--accent-soft)}
+.markdown .diagram [fill="#eb6c36"]{fill:var(--accent)}
+.markdown .diagram [stroke="#eb6c36"]{stroke:var(--accent)}
+.markdown .diagram [stroke="rgba(235,108,54,0.5)"]{stroke:var(--accent);stroke-opacity:.5}
+.markdown .diagram [stroke="rgba(235,108,54,0.35)"]{stroke:var(--accent);stroke-opacity:.35}
+.markdown .diagram [stroke="rgba(235,108,54,0.6)"]{stroke:var(--accent);stroke-opacity:.6}
 .markdown hr { border:none; border-top:1px solid var(--border); margin:28px 0; }
 
 /* toc */

@@ -2,6 +2,8 @@
 
 What happens when the user clicks the close button is a decision, not a default. This page covers the close hook (`OnCloseRequest`) and the standard `appshell.App` lifecycle in full, then the runtime toggle, single-instance guard and shutdown as advanced material.
 
+![On a close request OnCloseRequest returns Allow, Cancel, or Hide: Cancel keeps the window open, Hide moves it to the tray where Show restores it, and Allow with no tray or tray Quit exits the app.](lifecycle-states.svg)
+
 ## OnCloseRequest: intercepting close
 
 Set `OnCloseRequest` on `WindowOptions` and it runs first on every close request - the X button, Alt+F4, a `WM_CLOSE` from anywhere - and its `appshell.CloseAction` return decides the fate of that request:

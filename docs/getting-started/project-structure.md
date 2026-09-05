@@ -43,6 +43,8 @@ You edit `main.go`, `index.css`, and the files inside `pages/`, `components/`, `
 
 This is the heart of a Gantry app. Every page and every component is a **folder** holding up to three same-named files:
 
+![The app root holds main.go, gantry.json, and the pages and components folders; a page folder pairs a .go logic half with a .tsx look half under one key.](project-tree.svg)
+
 - `<name>.go` - the **logic** half. A normal Go package that exports one `ui.Page` (in `pages/`) or `ui.Component` (in `components/`) value.
 - `<name>.tsx` - the **look** half. A normal React component as the `default` export.
 - `<name>.css` - optional styles, imported automatically when the folder is built. No `import` statement needed anywhere.

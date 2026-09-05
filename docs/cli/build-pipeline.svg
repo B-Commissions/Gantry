@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 340" width="1000" height="340" role="img" aria-labelledby="build-title build-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="build-title">The gantry build pipeline</title>
+  <desc id="build-desc">gantry build regenerates the synthesized root and generated Go, runs one vite build into webdist, then compiles a go build per target that embeds webdist, producing a single executable per os and arch under dist.</desc>
+  <defs>
+    <marker id="bp-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- arrows -->
+  <path d="M 192 164 H 224" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#bp-arrow)"/>
+  <path d="M 384 164 H 416" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#bp-arrow)"/>
+  <path d="M 576 164 H 608" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#bp-arrow)"/>
+  <path d="M 768 164 H 800" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#bp-arrow)"/>
+
+  <!-- 1 sources -->
+  <rect x="32" y="120" width="160" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="32" y="120" width="160" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="40" y="128" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="55" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">SRC</text>
+  <text x="112" y="164" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">your app</text>
+  <text x="112" y="182" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">pages · components</text>
+  <text x="112" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">.go + .tsx + css</text>
+
+  <!-- 2 prepareApp -->
+  <rect x="224" y="120" width="160" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="224" y="120" width="160" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="232" y="128" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="247" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">GEN</text>
+  <text x="304" y="164" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">prepareApp</text>
+  <text x="304" y="182" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">regen .gantry/</text>
+  <text x="304" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">+ gantry_*.go</text>
+
+  <!-- 3 vite build -->
+  <rect x="416" y="120" width="160" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="416" y="120" width="160" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="424" y="128" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="439" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">WEB</text>
+  <text x="496" y="164" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">vite build</text>
+  <text x="496" y="182" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">bundle frontend</text>
+  <text x="496" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">-&gt; webdist/</text>
+
+  <!-- 4 go build -->
+  <rect x="608" y="120" width="160" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="608" y="120" width="160" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="616" y="128" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="631" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">BIN</text>
+  <text x="688" y="164" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">go build</text>
+  <text x="688" y="182" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">embeds webdist</text>
+  <text x="688" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">per target</text>
+
+  <!-- 5 dist (focal) -->
+  <rect x="800" y="120" width="168" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="800" y="120" width="168" height="88" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <rect x="808" y="128" width="34" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+  <text x="830" y="137" fill="#eb6c36" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">SHIP</text>
+  <text x="884" y="164" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">dist/</text>
+  <text x="884" y="182" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">&lt;os&gt;/&lt;arch&gt;/</text>
+  <text x="884" y="196" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">one exe</text>
+
+  <!-- aside -->
+  <text x="500" y="264" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="middle">Go binary plus the built frontend, in one file. Nothing to install on the target machine.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="300" x2="968" y2="300" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="316" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">PIPELINE</text>
+  <rect x="128" y="308" width="10" height="10" rx="2" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="144" y="316" fill="#4f5d75" font-size="9">build step</text>
+  <rect x="240" y="308" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="256" y="316" fill="#4f5d75" font-size="9">shipped artifact</text>
+</svg>

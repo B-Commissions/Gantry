@@ -1,0 +1,63 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://raw.githubusercontent.com/BlueBeard63/Gantry/main/gantry-docs.schema.json",
+  "title": "Gantry module docs manifest",
+  "description": "docs/manifest.json inside a Gantry module: the reading-order navigation for that module's pages, mounted under the module's section in `gantry docs`. Reuses the same page/group entry shape as the framework's own docs manifest. Omit the file to fall back to folder-derived nav (top-level pages listed directly, each subfolder becoming a group).",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "$schema": { "type": "string" },
+    "title": {
+      "type": "string",
+      "description": "Optional section heading for this module in the docs sidebar; defaults to the module's manifest title."
+    },
+    "entries": {
+      "type": "array",
+      "description": "Ordered navigation for the module's single section: each item is a page or a group.",
+      "items": { "$ref": "#/$defs/entry" }
+    },
+    "categories": {
+      "type": "array",
+      "description": "Alternative to entries: split the module's docs into several named sub-sections. Use entries for the common single-section case.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["title", "entries"],
+        "properties": {
+          "id": { "type": "string" },
+          "title": { "type": "string" },
+          "entries": { "type": "array", "items": { "$ref": "#/$defs/entry" } }
+        }
+      }
+    }
+  },
+  "$defs": {
+    "entry": {
+      "oneOf": [
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["path"],
+          "description": "A page: a markdown file relative to the module's docs root, without the leading namespace (e.g. notifications.md or guide/setup.md).",
+          "properties": {
+            "path": { "type": "string", "pattern": "\\.md$" },
+            "title": { "type": "string", "description": "Optional nav label; defaults to the page's first H1." }
+          }
+        },
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["group", "pages"],
+          "description": "A group: a collapsible heading nesting pages (and, if you must, further groups).",
+          "properties": {
+            "group": { "type": "string", "description": "The group heading shown in the sidebar." },
+            "pages": {
+              "type": "array",
+              "items": { "$ref": "#/$defs/entry" }
+            }
+          }
+        }
+      ]
+    }
+  }
+}

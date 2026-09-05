@@ -2,6 +2,8 @@
 
 [Paired handlers](pairs.md) are fire-and-forget: React sends, Go acts, nothing comes back. A **call** is the other half - React asks the Go side a question and `await`s the answer. This page covers the call mechanism itself: how you register a call, the exact shape `useCall` hands back, when `useCall` re-runs, how Go decides which handler answers, what happens when a call panics, and the 30-second timeout that keeps a dead server from leaking promises. For app-wide call groups and the hooks built on them see [Services & hooks](services.md); for the loading and error UI around a call see [Await & Skeleton](await.md).
 
+![React awaits a call by key and name; Go resolves the target as page then component then service, runs the handler on its own goroutine, and replies by resolving with data or rejecting with an error and code.](calls-sequence.svg)
+
 ## Registering a call on a pair
 
 When the tsx needs an ANSWER, give the pair a `Call` alongside (or instead of) its `On`:

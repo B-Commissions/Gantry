@@ -247,6 +247,10 @@
         {
           "path": "cli/mobile-and-docs.md",
           "title": "Mobile & docs"
+        },
+        {
+          "path": "cli/modules.md",
+          "title": "Modules"
         }
       ]
     },

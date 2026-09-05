@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 320" width="1080" height="320" role="img" aria-labelledby="errpipe-title errpipe-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="errpipe-title">The Gantry error pipeline</title>
+  <desc id="errpipe-desc">A captured error is stamped with the page and breadcrumb trail, passed to the app's OnError hook which may suppress it, recorded in a ring buffer of the last 20, then pushed to the frontend error UI as an error frame.</desc>
+  <defs>
+    <marker id="ep-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- arrows -->
+  <path d="M 212 160 H 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ep-arrow)"/>
+  <path d="M 480 160 H 568" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ep-arrow)"/>
+  <path d="M 748 160 H 836" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#ep-arrow)"/>
+
+  <!-- arrow labels -->
+  <rect x="212" y="138" width="88" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="256" y="147" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">STAMP + TRAIL</text>
+  <rect x="490" y="138" width="68" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="524" y="147" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">RECORD</text>
+  <rect x="748" y="138" width="88" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="792" y="147" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">{t:error} FRAME</text>
+
+  <!-- capture -->
+  <rect x="32" y="120" width="180" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="32" y="120" width="180" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="40" y="128" width="30" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="55" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">ERR</text>
+  <text x="122" y="166" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">capture site</text>
+  <text x="122" y="184" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">panic · js · crash</text>
+
+  <!-- OnError hook (focal) -->
+  <rect x="300" y="120" width="180" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="300" y="120" width="180" height="80" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <rect x="308" y="128" width="36" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+  <text x="326" y="137" fill="#eb6c36" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">HOOK</text>
+  <text x="390" y="166" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">OnError hook</text>
+  <text x="390" y="184" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">show | suppress</text>
+
+  <!-- ring buffer -->
+  <rect x="568" y="120" width="180" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="568" y="120" width="180" height="80" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+  <rect x="576" y="128" width="36" height="12" rx="2" fill="transparent" stroke="rgba(79,93,117,0.5)" stroke-width="0.8"/>
+  <text x="594" y="137" fill="#4f5d75" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">RING</text>
+  <text x="658" y="166" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">ring buffer</text>
+  <text x="658" y="184" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">last 20</text>
+
+  <!-- frontend UI -->
+  <rect x="836" y="120" width="212" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="836" y="120" width="212" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <rect x="844" y="128" width="26" height="12" rx="2" fill="transparent" stroke="rgba(45,49,66,0.4)" stroke-width="0.8"/>
+  <text x="857" y="137" fill="rgba(45,49,66,0.8)" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">UI</text>
+  <text x="942" y="166" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">frontend UI</text>
+  <text x="942" y="184" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">overlay | notice banner</text>
+
+  <!-- aside -->
+  <text x="32" y="248" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif">OnError can suppress the frame (the error is still recorded, and served on connect). A process crash -&gt; crash.log -&gt; reported next launch.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="284" x2="1048" y2="284" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="300" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">PIPELINE</text>
+  <rect x="128" y="292" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="144" y="300" fill="#4f5d75" font-size="9">your interception point</text>
+  <rect x="316" y="292" width="10" height="10" rx="2" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+  <text x="332" y="300" fill="#4f5d75" font-size="9">store (last 20)</text>
+</svg>

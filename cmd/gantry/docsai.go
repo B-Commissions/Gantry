@@ -125,6 +125,12 @@ func aiTokenize(s string) []string {
 // small local-model context window still draw on the whole knowledge base:
 // only the most relevant pages are sent as context, per question.
 func (s *docsSite) retrieve(query string, k int) []aiDoc {
+	return retrieveFrom(s.aiDocs, query, k)
+}
+
+// retrieveFrom is retrieve over an explicit pool, so the MCP namespace filter
+// can score just one module's pages without duplicating the ranking.
+func retrieveFrom(pool []aiDoc, query string, k int) []aiDoc {
 	toks := aiTokenize(query)
 	if len(toks) == 0 {
 		return nil
@@ -134,7 +140,7 @@ func (s *docsSite) retrieve(query string, k int) []aiDoc {
 		score int
 	}
 	var out []scored
-	for _, d := range s.aiDocs {
+	for _, d := range pool {
 		titleLower := strings.ToLower(d.Title)
 		sc := 0
 		for _, t := range toks {

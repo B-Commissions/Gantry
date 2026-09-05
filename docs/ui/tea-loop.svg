@@ -1,0 +1,70 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 460" width="820" height="460" role="img" aria-labelledby="tea-title tea-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="tea-title">The Tea update loop</title>
+  <desc id="tea-desc">One serialized loop: View renders the Model as a node tree sent to React; a user event becomes a Msg that Update folds into a new Model. Commands run asynchronously and re-enter as messages.</desc>
+  <defs>
+    <marker id="tl-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+    <marker id="tl-arrow-accent" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#eb6c36"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- ring arrows (clockwise) -->
+  <path d="M 340 136 H 480" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#tl-arrow)"/>
+  <path d="M 580 176 V 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#tl-arrow)"/>
+  <path d="M 480 340 H 340" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#tl-arrow)"/>
+  <path d="M 240 300 V 176" fill="none" stroke="#eb6c36" stroke-width="1.2" marker-end="url(#tl-arrow-accent)"/>
+  <!-- Cmd async self-loop on Update -->
+  <path d="M 140 356 H 104 q-8 0 -8 -8 V 332 q0 -8 8 -8 H 140" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3" marker-end="url(#tl-arrow)"/>
+
+  <!-- arrow labels -->
+  <rect x="386" y="114" width="36" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="404" y="123" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">VIEW</text>
+  <rect x="588" y="232" width="56" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="616" y="241" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">TREE · ws</text>
+  <rect x="368" y="318" width="84" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="327" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">EVENT -&gt; MSG</text>
+  <rect x="156" y="232" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="192" y="241" fill="#eb6c36" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">NEW MODEL</text>
+  <rect x="24" y="328" width="60" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="54" y="337" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">CMD (async)</text>
+
+  <!-- Model (focal) -->
+  <rect x="140" y="96" width="200" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="140" y="96" width="200" height="80" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <rect x="148" y="104" width="46" height="12" rx="2" fill="transparent" stroke="rgba(235,108,54,0.5)" stroke-width="0.8"/>
+  <text x="171" y="113" fill="#eb6c36" font-size="7" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.08em">STATE</text>
+  <text x="240" y="140" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Model</text>
+  <text x="240" y="158" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">your state, by value</text>
+
+  <!-- View -->
+  <rect x="480" y="96" width="200" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="480" y="96" width="200" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="580" y="140" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">View()</text>
+  <text x="580" y="158" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">builds a Node tree</text>
+
+  <!-- React (client) -->
+  <rect x="480" y="300" width="200" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="480" y="300" width="200" height="80" rx="6" fill="rgba(79,93,117,0.1)" stroke="#7a8399" stroke-width="1"/>
+  <text x="580" y="344" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">React</text>
+  <text x="580" y="362" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">renders · emits events</text>
+
+  <!-- Update -->
+  <rect x="140" y="300" width="200" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="140" y="300" width="200" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="240" y="344" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Update()</text>
+  <text x="240" y="362" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">(Msg) -&gt; Model, Cmd</text>
+
+  <!-- editorial aside -->
+  <text x="788" y="52" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">One goroutine owns the model;</text>
+  <text x="788" y="72" fill="#4f5d75" font-size="14" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">a burst coalesces to one render.</text>
+
+  <!-- legend -->
+  <line x1="32" y1="424" x2="788" y2="424" stroke="rgba(45,49,66,0.1)" stroke-width="0.8"/>
+  <text x="32" y="440" fill="#4f5d75" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" letter-spacing="0.14em">LEGEND</text>
+  <rect x="120" y="432" width="10" height="10" rx="2" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="136" y="440" fill="#4f5d75" font-size="9">the state</text>
+  <line x1="220" y1="437" x2="250" y2="437" stroke="#4f5d75" stroke-width="1"/>
+  <text x="258" y="440" fill="#4f5d75" font-size="9">the loop</text>
+  <line x1="330" y1="437" x2="360" y2="437" stroke="#4f5d75" stroke-width="1" stroke-dasharray="4,3"/>
+  <text x="368" y="440" fill="#4f5d75" font-size="9">command (async)</text>
+</svg>

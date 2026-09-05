@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 860 400" width="860" height="400" role="img" aria-labelledby="life-title life-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="life-title">The window and app lifecycle</title>
+  <desc id="life-desc">On a close request OnCloseRequest returns Allow, Cancel, or Hide: Cancel keeps the window open, Hide moves it to the tray where Show restores it, and Allow (with no tray) or tray Quit exits the app.</desc>
+  <defs>
+    <marker id="lc-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- initial marker -->
+  <circle cx="48" cy="164" r="6" fill="#4f5d75"/>
+  <path d="M 54 164 H 100" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="56" y="142" width="44" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="78" y="151" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">LAUNCH</text>
+
+  <!-- transitions -->
+  <!-- Open self-loop: CloseCancel -->
+  <path d="M 168 120 V 96 H 232 V 120" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="158" y="78" width="84" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="200" y="87" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">CANCEL · stay</text>
+  <!-- Open -> Hidden -->
+  <path d="M 300 148 H 560" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="382" y="126" width="96" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="430" y="135" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">HIDE · to tray</text>
+  <!-- Hidden -> Open -->
+  <path d="M 560 180 H 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="366" y="188" width="128" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="430" y="197" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">SHOW · tray Open</text>
+  <!-- Open -> Exited -->
+  <path d="M 180 208 V 272 H 360 V 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="192" y="250" width="120" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="252" y="259" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">ALLOW (no tray)</text>
+  <!-- Hidden -> Exited -->
+  <path d="M 660 208 V 272 H 420 V 300" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#lc-arrow)"/>
+  <rect x="560" y="250" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="596" y="259" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">TRAY QUIT</text>
+
+  <!-- Open (focal) -->
+  <rect x="100" y="120" width="200" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="100" y="120" width="200" height="88" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="200" y="158" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Open</text>
+  <text x="200" y="176" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">window shown, running</text>
+
+  <!-- Hidden -->
+  <rect x="560" y="120" width="200" height="88" rx="6" fill="#f5f5f5"/>
+  <rect x="560" y="120" width="200" height="88" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="660" y="158" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Hidden</text>
+  <text x="660" y="176" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">in tray, running</text>
+
+  <!-- Exited -->
+  <rect x="260" y="300" width="200" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="260" y="300" width="200" height="72" rx="6" fill="rgba(45,49,66,0.05)" stroke="#4f5d75" stroke-width="1"/>
+  <text x="360" y="332" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">Exited</text>
+  <text x="360" y="350" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">ctx cancelled, process done</text>
+
+  <!-- aside -->
+  <text x="820" y="332" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">OnCloseRequest returns Allow,</text>
+  <text x="820" y="350" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">Cancel, or Hide. Tray Quit</text>
+  <text x="820" y="368" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">bypasses the hook.</text>
+</svg>

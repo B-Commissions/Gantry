@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 820 380" width="820" height="380" role="img" aria-labelledby="await-title await-desc" font-family="Geist, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif">
+  <title id="await-title">How Await renders a CallResult</title>
+  <desc id="await-desc">Await shows the fallback while loading, then either the content when the call resolves or an error card with Retry when it rejects; Retry re-runs the call, returning to loading.</desc>
+  <defs>
+    <marker id="aw-arrow" markerWidth="8" markerHeight="6" refX="7" refY="3" orient="auto"><polygon points="0 0, 8 3, 0 6" fill="#4f5d75"/></marker>
+  </defs>
+
+  <rect width="100%" height="100%" fill="#f5f5f5"/>
+
+  <!-- initial -->
+  <circle cx="48" cy="160" r="6" fill="#4f5d75"/>
+  <path d="M 54 160 H 100" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#aw-arrow)"/>
+  <rect x="54" y="138" width="44" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="76" y="147" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">MOUNT</text>
+
+  <!-- transitions -->
+  <path d="M 280 144 H 540" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#aw-arrow)"/>
+  <rect x="374" y="122" width="72" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="131" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">RESOLVE</text>
+
+  <path d="M 540 176 H 280" fill="none" stroke="#4f5d75" stroke-width="1" stroke-dasharray="5,4" marker-end="url(#aw-arrow)"/>
+  <rect x="378" y="182" width="64" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="410" y="191" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">RELOAD</text>
+
+  <path d="M 140 200 V 252 H 372 V 280" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#aw-arrow)"/>
+  <rect x="150" y="230" width="56" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="178" y="239" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">REJECT</text>
+
+  <path d="M 448 280 V 236 H 240 V 200" fill="none" stroke="#4f5d75" stroke-width="1" marker-end="url(#aw-arrow)"/>
+  <rect x="286" y="230" width="88" height="12" rx="2" fill="#f5f5f5"/>
+  <text x="330" y="239" fill="#7a8399" font-size="8" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle" letter-spacing="0.06em">RETRY · reload</text>
+
+  <!-- loading -->
+  <rect x="100" y="120" width="180" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="100" y="120" width="180" height="80" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="190" y="158" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">loading</text>
+  <text x="190" y="176" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">fallback / Skeleton</text>
+
+  <!-- content (focal) -->
+  <rect x="540" y="120" width="180" height="80" rx="6" fill="#f5f5f5"/>
+  <rect x="540" y="120" width="180" height="80" rx="6" fill="#fdeee6" stroke="#eb6c36" stroke-width="1"/>
+  <text x="630" y="158" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">content</text>
+  <text x="630" y="176" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">children(data)</text>
+
+  <!-- error -->
+  <rect x="320" y="280" width="180" height="72" rx="6" fill="#f5f5f5"/>
+  <rect x="320" y="280" width="180" height="72" rx="6" fill="#ffffff" stroke="#2d3142" stroke-width="1"/>
+  <text x="410" y="312" fill="#2d3142" font-size="12" font-weight="600" text-anchor="middle">error</text>
+  <text x="410" y="330" fill="#4f5d75" font-size="9" font-family="ui-monospace, SFMono-Regular, Menlo, monospace" text-anchor="middle">card + Retry</text>
+
+  <!-- aside -->
+  <text x="788" y="316" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">Await picks in order:</text>
+  <text x="788" y="334" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">loading, then error,</text>
+  <text x="788" y="352" fill="#4f5d75" font-size="13" font-style="italic" font-family="ui-serif, Georgia, 'Times New Roman', serif" text-anchor="end">then content.</text>
+</svg>
