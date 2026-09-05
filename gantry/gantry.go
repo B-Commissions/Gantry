@@ -317,7 +317,14 @@ func run(cfg Config, f runFlags) error {
 	// catch-all does not swallow /resources/* into index.html; the
 	// ServeMux longest-prefix match makes "/resources/" win regardless.
 	if appResources != nil {
-		mux.Handle("/resources/", http.StripPrefix("/resources/", http.FileServer(http.FS(appResources))))
+		res := http.StripPrefix("/resources/", http.FileServer(http.FS(appResources)))
+		mux.Handle("/resources/", http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			// Embedded resources are referenced by stable path (not content-
+			// hashed), so revalidate rather than cache-forever: a new app
+			// build may change the bytes behind the same URL.
+			w.Header().Set("Cache-Control", "no-cache")
+			res.ServeHTTP(w, r)
+		}))
 	}
 	if cfg.Setup != nil {
 		cfg.Setup(app, mux)

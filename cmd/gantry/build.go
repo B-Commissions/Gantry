@@ -281,7 +281,15 @@ func buildOne(appDir string, cfg appConfig, t buildTarget, console, installer bo
 	if t.OS == "windows" && !console {
 		ldflags = "-H windowsgui " + ldflags
 	}
-	goArgs := []string{"build", "-o", outPath, "-ldflags", ldflags, "."}
+	goArgs := []string{"build", "-o", outPath}
+	// Release builds strip the symbol table and DWARF and trim file
+	// system paths for a smaller, faster-loading binary (parity with the
+	// Android release path). --console keeps them for debugging.
+	if !console {
+		ldflags = "-s -w " + ldflags
+		goArgs = append(goArgs, "-trimpath")
+	}
+	goArgs = append(goArgs, "-ldflags", ldflags, ".")
 	cmd := exec.Command("go", goArgs...)
 	cmd.Dir = appDir
 	cmd.Env = append(os.Environ(), "GOOS="+t.goos(), "GOARCH="+t.Arch)
