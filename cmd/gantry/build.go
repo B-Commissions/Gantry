@@ -8,10 +8,12 @@ import (
 	"fmt"
 	"image"
 	_ "image/png"
+	"io/fs"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"runtime"
+	"sort"
 	"strings"
 
 	"github.com/tc-hib/winres"
@@ -137,7 +139,62 @@ func prepareApp(appDir string, cfg appConfig) error {
 	if err := vite.Run(); err != nil {
 		return fmt.Errorf("vite build failed: %w", err)
 	}
+	reportBundleSize(filepath.Join(appDir, "webdist"))
 	return nil
+}
+
+// reportBundleSize prints the built frontend's total size and its
+// largest chunks, so a build makes bundle growth visible (the main
+// lever on cold-start time). Best-effort: a walk error is skipped
+// silently rather than failing the build.
+func reportBundleSize(webdist string) {
+	type entry struct {
+		name string
+		size int64
+	}
+	var files []entry
+	var total int64
+	_ = filepath.WalkDir(webdist, func(p string, d fs.DirEntry, err error) error {
+		if err != nil || d.IsDir() {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+		rel, relErr := filepath.Rel(webdist, p)
+		if relErr != nil {
+			rel = p
+		}
+		files = append(files, entry{name: filepath.ToSlash(rel), size: info.Size()})
+		total += info.Size()
+		return nil
+	})
+	if len(files) == 0 {
+		return
+	}
+	sort.Slice(files, func(i, j int) bool { return files[i].size > files[j].size })
+	step("frontend bundle: %s across %d files", humanBytes(total), len(files))
+	for i, f := range files {
+		if i >= 5 {
+			break
+		}
+		fmt.Printf("    %9s  %s\n", humanBytes(f.size), f.name)
+	}
+}
+
+// humanBytes formats a byte count as a short human-readable string.
+func humanBytes(n int64) string {
+	const unit = 1024
+	if n < unit {
+		return fmt.Sprintf("%d B", n)
+	}
+	div, exp := int64(unit), 0
+	for m := n / unit; m >= unit; m /= unit {
+		div *= unit
+		exp++
+	}
+	return fmt.Sprintf("%.1f %cB", float64(n)/float64(div), "KMGTPE"[exp])
 }
 
 // resolveTargets parses the flag or gantry.json list; empty = the

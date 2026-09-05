@@ -10,6 +10,7 @@ import { setRegistry, type ComponentRegistry, type TeaComponentProps } from "./t
 import { installErrorHandlers, reportError, useGantryErrors, dismissNotice, clearFatal, setDevMode, type ErrorHandlingOptions, type GantryErrorInfo } from "./errors";
 import { ErrorScreen, type ErrorScreenProps } from "./ErrorScreen";
 import { fetchEnv, useMode } from "./env";
+import { perfMark } from "./perf";
 
 /** The shape of a page module (a pages/<name>/<name>.tsx file). */
 export interface GantryPageModule {
@@ -325,6 +326,7 @@ function AppRoot({ options }: { options: CreateAppOptions }) {
  * an app only touches it to pass options.
  */
 export function createApp(app: GantryAppModule, options: CreateAppOptions = {}): void {
+  perfMark("createApp");
   reg = app;
   // The optional root app.tsx wins over the synthesized defaults, so
   // apps customize everything without owning the entry file.
@@ -365,4 +367,7 @@ export function createApp(app: GantryAppModule, options: CreateAppOptions = {}):
       <AppRoot options={options} />
     </StrictMode>,
   );
+  // First painted frame after the initial React commit - the closest
+  // proxy for time-to-first-paint we can measure from here.
+  requestAnimationFrame(() => perfMark("first-frame"));
 }

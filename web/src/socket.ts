@@ -3,6 +3,8 @@
 // backoff (webview reloads, dev server restarts, HMR) and re-announces
 // the active page on every connect so the server always re-renders.
 
+import { perfMark } from "./perf";
+
 /** GantryCallError rejects a failed callGo with the gerr code the Go
  * side attached ("panic.call", or the code of the returned error), so
  * callers can switch on it. */
@@ -37,6 +39,8 @@ type StateListener = () => void;
 let ws: WebSocket | null = null;
 let url = "";
 let activePage = "";
+// One-shot guard so the perf log marks only the first Tea render frame.
+let firstRenderMarked = false;
 // The active page's captured route params, re-sent on every (re)connect
 // alongside the page key so the Go side can read them. Normalized to
 // arrays on the wire: a [id] value is a single-element array, a [...slug]
@@ -74,6 +78,7 @@ function open(): void {
   ws = sock;
   sock.onopen = () => {
     backoff = 300;
+    perfMark("ws-open");
     if (activePage) sock.send(JSON.stringify({ t: "ready", page: activePage, params: activeParams }));
     while (sendQueue.length > 0) sock.send(sendQueue.shift() as string);
   };
@@ -95,6 +100,10 @@ function open(): void {
       return;
     }
     if (msg.t === "render" && msg.tree) {
+      if (!firstRenderMarked) {
+        firstRenderMarked = true;
+        perfMark("first-tea-render");
+      }
       renderListener?.(msg.tree);
     } else if (msg.t === "push" && msg.key && msg.name) {
       pushListeners.get(msg.key)?.forEach((fn) => fn(msg.name as string, msg.p));
